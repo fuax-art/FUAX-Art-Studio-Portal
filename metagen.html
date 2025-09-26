@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FUAX Metadata Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #00ff00;
+        }
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #00cc00;
+        }
+        textarea {
+            width: 100%;
+            height: 400px;
+            background: #1a1a1a;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px;
+            font-family: monospace;
+        }
+        .output {
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        .instructions {
+            background: #333;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="text-align:center; margin-bottom:1.5em;">
+            <img src="branding/fuax-logo.png" alt="Forever Unfinished Artworx Logo" style="width:60px; height:auto; margin-bottom:0.3em;" onerror="this.style.display='none'">
+            <div style="font-size:1.6em; font-weight:bold; color:#0ea5e9; letter-spacing:2px;">Forever Unfinished Artworx <span style="font-size:1em; color:#6366f1; font-weight:bold; margin-left:6px;">(FUAX)</span></div>
+            <div style="font-size:1em; color:#4f46e5; margin-top:0.2em;">Metadata Generator</div>
+        </div>
+        
+        <h1 style="color:#04f5e5; text-shadow:0 0 10px #04f5e5;">FUAX Metadata Generator</h1>
+        
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <p>1. Click "Generate All Metadata" to create 100 unique FUAX NFTs</p>
+            <p>2. Copy the CSV output and save it as a .csv file</p>
+            <p>3. Import to OpenSea Studio or use for manual entry</p>
+        </div>
+
+        <button onclick="generateMetadata()">🚀 Generate All Metadata</button>
+        <button onclick="generateSingleRandom()">🎲 Generate One Random</button>
+        <button onclick="showEditor()">✏️ Edit Metadata</button>
+        <button onclick="clearOutput()">🗑️ Clear Output</button>
+        <button onclick="downloadCSV()">📥 Download CSV</button>
+        
+        <div id="editor" style="display:none; margin-top:20px; background:#333; padding:20px; border-radius:10px;">
+            <h3>Edit Individual NFT:</h3>
+            <label>NFT Number (1-100): <input type="number" id="editId" min="1" max="100" value="1"></label><br><br>
+            <label>Name: <input type="text" id="editName" style="width:300px;"></label><br><br>
+            
+            <label>Personality:</label>
+            <select id="editPersonality">
+                <option>Sleeper</option>
+                <option>Hacker</option>
+                <option>Gamer</option>
+                <option>Artist</option>
+                <option>Rebel</option>
+                <option>Explorer</option>
+                <option>Guardian</option>
+                <option>Trickster</option>
+                <option>Scholar</option>
+                <option>Warrior</option>
+            </select><br><br>
+            
+            <label>Digital Affinity:</label>
+            <select id="editDigitalAffinity">
+                <option>Code Master</option>
+                <option>Data Analyst</option>
+                <option>Network Specialist</option>
+                <option>Security Expert</option>
+                <option>AI Whisperer</option>
+                <option>Crypto Enthusiast</option>
+                <option>System Admin</option>
+                <option>Blockchain Oracle</option>
+                <option>Quantum Processor</option>
+                <option>Reality Coder</option>
+            </select><br><br>
+            
+            <label>Energy Level:</label>
+            <select id="editEnergyLevel">
+                <option>Chill</option>
+                <option>Focused</option>
+                <option>Hyper</option>
+                <option>Zen</option>
+                <option>Chaotic</option>
+                <option>Explosive</option>
+                <option>Glitched</option>
+                <option>Overclocked</option>
+            </select><br><br>
+            
+            <label>Special Ability:</label>
+            <select id="editSpecialAbility">
+                <option>Memory Bank</option>
+                <option>Processing Power</option>
+                <option>Connection Speed</option>
+                <option>Firewall Strength</option>
+                <option>Battery Life</option>
+                <option>Encryption Key</option>
+                <option>Dream Hacking</option>
+                <option>Time Dilation</option>
+                <option>Reality Sync</option>
+                <option>Universe Access</option>
+            </select><br><br>
+            
+            <label>Origin Story:</label>
+            <select id="editOriginStory">
+                <option>Lab Creation</option>
+                <option>Street Upload</option>
+                <option>Corporate Escape</option>
+                <option>Indie Development</option>
+                <option>Open Source</option>
+                <option>Black Market</option>
+                <option>Government Project</option>
+                <option>Alien Download</option>
+                <option>Glitch Spawn</option>
+            </select><br><br>
+            
+            <button onclick="loadForEdit()">📋 Load Current Data</button>
+            <button onclick="saveEdit()">💾 Save Changes</button>
+            <button onclick="hideEditor()">❌ Close Editor</button>
+        </div>
+
+        <div class="output">
+            <h3>Output:</h3>
+            <textarea id="output" placeholder="Generated metadata will appear here..."></textarea>
+        </div>
+        <footer style="margin-top:2em; text-align:center; color:#6366f1; font-size:1em;">
+            <img src="branding/fuax-logo.png" alt="Forever Unfinished Artworx Logo" style="width:28px; height:auto; display:inline-block; vertical-align:middle; margin-right:6px;" onerror="this.style.display='none'">
+            <span style="font-weight:bold; color:#0ea5e9;">Forever Unfinished Artworx (FUAX)</span> &mdash; Metadata Generator &copy; 2025
+        </footer>
+    </div>
+
+    <script>
+        // Your 100 Cyber Pug names
+        const names = [
+            "ByteBark", "PixelPaws", "CodeCrush", "DataDog", "CryptoPup", "NetNinja", "BugFixer", "CloudChaser", "SyntaxSnort", "FirewallFido",
+            "NeonNose", "LaserLick", "PlasmaPooch", "CyberSnout", "TurboTail", "QuantumQuirk", "PhotonPug", "AtomicArf", "NitroNap", "VortexVibe",
+            "GlitchGrunt", "RogueRuff", "RebelByte", "AnarchyArf", "ChaosChip", "VirusVibe", "HackerHowl", "OutlawOmega", "PiratePaws", "MaverickMega",
+            "BossBark", "PowerPup", "LevelLord", "QuestQueen", "ArcadeArf", "RetroRuff", "ComboCanine", "UltimateUwU", "LegendLick", "EpicEars",
+            "SnuggleScript", "CuddleCode", "FluffyFirewall", "WiggleWiFi", "BoopBot", "SquishSQL", "PuffyPixel", "ChubbyChip", "RoundRAM", "BubbleByte",
+            "ZephyrZap", "NebulaNose", "EchoEngine", "RhythmRAM", "HarmonyHex", "MelodyMega", "BeatBinary", "PulsePup", "VibeVector", "FreqFido",
+            "CrimsonCode", "VioletVirus", "AzureAlgo", "GoldenGig", "SilverSync", "PlatinumPaws", "RubyRun", "EmeraldExe", "SapphireScript", "DiamondData",
+            "VoltVibe", "ThunderThumb", "LightningLick", "SparkSniffer", "BoltBark", "ChargeChew", "CurrentCrush", "WattWag", "AmpArf", "SurgeSit",
+            "StarshipSnort", "GalaxyGrunt", "CosmosCrush", "OrbitOmega", "PlanetPaws", "MeteorMunch", "AsteroidArf", "CometCrush", "NovaNose", "SupernovaSit",
+            "AlphaArch", "BetaBark", "GammaGrowl", "DeltaDog", "EpsilonEars", "ZetaZoom", "EtaEngine", "ThetaThumb", "IotaIdle", "KappaKeen"
+        ];
+
+        // Trait definitions with rarity weights - PERSONALITY BASED
+        const traits = {
+            personality: [
+                {name: "Sleeper", weight: 15},
+                {name: "Hacker", weight: 15},
+                {name: "Gamer", weight: 15},
+                {name: "Artist", weight: 12},
+                {name: "Rebel", weight: 10},
+                {name: "Explorer", weight: 10},
+                {name: "Guardian", weight: 8},
+                {name: "Trickster", weight: 6},
+                {name: "Scholar", weight: 5},
+                {name: "Warrior", weight: 4}
+            ],
+            digitalAffinity: [
+                {name: "Code Master", weight: 20},
+                {name: "Data Analyst", weight: 18},
+                {name: "Network Specialist", weight: 15},
+                {name: "Security Expert", weight: 12},
+                {name: "AI Whisperer", weight: 10},
+                {name: "Crypto Enthusiast", weight: 8},
+                {name: "System Admin", weight: 7},
+                {name: "Blockchain Oracle", weight: 5},
+                {name: "Quantum Processor", weight: 3},
+                {name: "Reality Coder", weight: 2}
+            ],
+            energyLevel: [
+                {name: "Chill", weight: 25},
+                {name: "Focused", weight: 20},
+                {name: "Hyper", weight: 18},
+                {name: "Zen", weight: 15},
+                {name: "Chaotic", weight: 12},
+                {name: "Explosive", weight: 6},
+                {name: "Glitched", weight: 3},
+                {name: "Overclocked", weight: 1}
+            ],
+            specialAbility: [
+                {name: "Memory Bank", weight: 20},
+                {name: "Processing Power", weight: 18},
+                {name: "Connection Speed", weight: 16},
+                {name: "Firewall Strength", weight: 14},
+                {name: "Battery Life", weight: 10},
+                {name: "Encryption Key", weight: 8},
+                {name: "Dream Hacking", weight: 6},
+                {name: "Time Dilation", weight: 4},
+                {name: "Reality Sync", weight: 3},
+                {name: "Universe Access", weight: 1}
+            ],
+            originStory: [
+                {name: "Lab Creation", weight: 22},
+                {name: "Street Upload", weight: 20},
+                {name: "Corporate Escape", weight: 18},
+                {name: "Indie Development", weight: 15},
+                {name: "Open Source", weight: 10},
+                {name: "Black Market", weight: 8},
+                {name: "Government Project", weight: 4},
+                {name: "Alien Download", weight: 2},
+                {name: "Glitch Spawn", weight: 1}
+            ]
+        };
+
+        // Weighted random selection function
+        function weightedRandom(items) {
+            const totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
+            const random = Math.random() * totalWeight;
+            let currentWeight = 0;
+            
+            for (let item of items) {
+                currentWeight += item.weight;
+                if (random <= currentWeight) {
+                    return item.name;
+                }
+            }
+            return items[0].name; // fallback
+        }
+
+        // Generate single metadata object
+        function generateSingle(index) {
+            return {
+                id: index,
+                name: `${names[index - 1]} #${index.toString().padStart(3, '0')}`,
+                description: "A unique Cyber Pug from the digital realm",
+                personality: weightedRandom(traits.personality),
+                digitalAffinity: weightedRandom(traits.digitalAffinity),
+                energyLevel: weightedRandom(traits.energyLevel),
+                specialAbility: weightedRandom(traits.specialAbility),
+                originStory: weightedRandom(traits.originStory)
+            };
+        }
+
+        // Store generated metadata globally for editing
+        let generatedData = [];
+
+        // Generate all 100 metadata entries
+        function generateMetadata() {
+            generatedData = []; // Reset
+            
+            for (let i = 1; i <= 100; i++) {
+                generatedData.push(generateSingle(i));
+            }
+            
+            updateOutput();
+        }
+
+        // Update the CSV output display
+        function updateOutput() {
+            let csv = "ID,Name,Description,Personality,Digital Affinity,Energy Level,Special Ability,Origin Story\n";
+            
+            generatedData.forEach(item => {
+                csv += `${item.id},"${item.name}","${item.description}","${item.personality}","${item.digitalAffinity}","${item.energyLevel}","${item.specialAbility}","${item.originStory}"\n`;
+            });
+            
+            document.getElementById('output').value = csv;
+        }
+
+        // Show/hide editor
+        function showEditor() {
+            if (generatedData.length === 0) {
+                alert('Generate metadata first!');
+                return;
+            }
+            document.getElementById('editor').style.display = 'block';
+        }
+        
+        function hideEditor() {
+            document.getElementById('editor').style.display = 'none';
+        }
+
+        // Load data for editing
+        function loadForEdit() {
+            const id = parseInt(document.getElementById('editId').value);
+            if (id < 1 || id > 100 || !generatedData[id-1]) {
+                alert('Invalid NFT number or no data generated!');
+                return;
+            }
+            
+            const item = generatedData[id-1];
+            document.getElementById('editName').value = item.name;
+            document.getElementById('editPersonality').value = item.personality;
+            document.getElementById('editDigitalAffinity').value = item.digitalAffinity;
+            document.getElementById('editEnergyLevel').value = item.energyLevel;
+            document.getElementById('editSpecialAbility').value = item.specialAbility;
+            document.getElementById('editOriginStory').value = item.originStory;
+        }
+
+        // Save edited data
+        function saveEdit() {
+            const id = parseInt(document.getElementById('editId').value);
+            if (id < 1 || id > 100 || !generatedData[id-1]) {
+                alert('Invalid NFT number!');
+                return;
+            }
+            
+            // Update the data
+            generatedData[id-1] = {
+                id: id,
+                name: document.getElementById('editName').value,
+                description: "A unique Cyber Pug from the digital realm",
+                personality: document.getElementById('editPersonality').value,
+                digitalAffinity: document.getElementById('editDigitalAffinity').value,
+                energyLevel: document.getElementById('editEnergyLevel').value,
+                specialAbility: document.getElementById('editSpecialAbility').value,
+                originStory: document.getElementById('editOriginStory').value
+            };
+            
+            // Refresh the output
+            updateOutput();
+            alert(`NFT #${id} updated!`);
+        }
+
+        // Generate one random for testing
+        function generateSingleRandom() {
+            const randomIndex = Math.floor(Math.random() * 100) + 1;
+            const metadata = generateSingle(randomIndex);
+            
+            const output = `
+ID: ${metadata.id}
+Name: ${metadata.name}
+Description: ${metadata.description}
+Personality: ${metadata.personality}
+Digital Affinity: ${metadata.digitalAffinity}
+Energy Level: ${metadata.energyLevel}
+Special Ability: ${metadata.specialAbility}
+Origin Story: ${metadata.originStory}
+
+---
+
+CSV Format:
+${metadata.id},"${metadata.name}","${metadata.description}","${metadata.personality}","${metadata.digitalAffinity}","${metadata.energyLevel}","${metadata.specialAbility}","${metadata.originStory}"
+            `;
+            
+            document.getElementById('output').value = output;
+        }
+
+        // Clear output
+        function clearOutput() {
+            document.getElementById('output').value = '';
+        }
+
+        // Download as CSV file
+        function downloadCSV() {
+            const content = document.getElementById('output').value;
+            if (!content) {
+                alert('Generate metadata first!');
+                return;
+            }
+            
+            const blob = new Blob([content], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cyber_pugs_metadata.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

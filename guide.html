@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Art Generator & Metadata Generator Guide</title>
+	<style>
+		body { font-family: Arial, sans-serif; background: #020303; color: #222; max-width: 900px; margin: 0 auto; padding: 32px; }
+		h1, h2, h3 { color: #04f5e5; }
+		h1 { text-align: center; margin-bottom: 0.5em; }
+		h2 { margin-top: 2em; }
+		.section { background: #020101; border-radius: 10px; box-shadow: 0 2px 8px #0001; padding: 24px; margin-bottom: 2em; }
+		ul, ol { margin-left: 1.5em; }
+		code, pre { background: #101111; color: #1e293b; padding: 2px 6px; border-radius: 4px; }
+		.tip { background: #000000; border-left: 4px solid #6366f1; padding: 12px; margin: 1em 0; border-radius: 6px; }
+	</style>
+</head>
+<body>
+
+	<div class="fuax-brand" style="text-align:center; margin-bottom:2em;">
+		<!-- Replace src with your logo file when ready -->
+		<img src="branding/fuax-logo.png" alt="Forever Unfinished Artworx Logo" style="width:120px; height:auto; margin-bottom:0.5em;" onerror="this.style.display='none'">
+		<div style="font-size:2.2em; font-weight:bold; color:#0ea5e9; letter-spacing:2px;">Forever Unfinished Artworx <span style="font-size:1.1em; color:#6366f1; font-weight:bold; margin-left:8px;">(FUAX)</span></div>
+		<div style="font-size:1.1em; color:#4f46e5; margin-top:0.3em;">NFT Creation Guide</div>
+	</div>
+
+	<h1 style="text-align:center; margin-bottom:0.5em; letter-spacing:2px;">FUAX Art Generator Studio & Metadata Generator Guide</h1>
+
+	<div class="section">
+		<h2>Overview</h2>
+		<p>Welcome to the official guide for <b>Forever Unfinished Artworx</b> (<b>FUAX</b>) tools!<br>
+		This guide will walk you through:</p>
+		<ul>
+			<li>Generating unique NFT artwork with the <b>FUAX Art Generator Studio</b> (<code>artgen.html</code>)</li>
+			<li>Creating and editing metadata for your NFTs with the <b>FUAX Metadata Generator</b> (<code>metagen.html</code>)</li>
+			<li>Exporting your collection for use on platforms like OpenSea and beyond</li>
+		</ul>
+	</div>
+
+	<div class="section">
+		<h2>1. Generating NFT Artwork with FUAX Art Generator Studio</h2>
+		<ol>
+			<li><b>Open the FUAX Art Generator Studio:</b><br>Open <code>artgen.html</code> in your browser.</li>
+			<li><b>Set Up Your Collection:</b><br>
+				<ul>
+					<li><b>Collection Name:</b> Enter a name for your NFT collection.</li>
+					<li><b>AI Prompt:</b> Describe the type of artwork you want (e.g., “A futuristic robot in a neon city”).</li>
+					<li><b>Number of Artworks:</b> Choose how many unique artworks to generate (up to 1000).</li>
+				</ul>
+			</li>
+			<li><b>(Optional) Use Reference Images and Metadata:</b><br>
+				<ul>
+					<li><b>Reference Image:</b> Upload a PNG or JPG image to use as a visual base for the AI (optional).</li>
+					<li><b>Metadata (.json or .csv):</b> Upload a file with trait data to guide the artwork generation (optional, but useful for trait consistency).</li>
+				</ul>
+			</li>
+			<li><b>Select Traits:</b><br>Use the Traits Editor to pick or randomize traits for your collection (background, character, accessories, rarity, etc.).</li>
+			<li><b>Generate Your Collection:</b><br>Click <b>Generate Collection</b>. The app will use AI to create unique images based on your prompt, traits, and reference image. Preview the generated images in the right panel.</li>
+			<li><b>Export Your Artwork:</b><br>Use the <b>Export Options</b> to download your images as PNGs. You can also export trait data as JSON or CSV for use in the metadata generator.</li>
+		</ol>
+	</div>
+
+	<div class="section">
+		<h2>2. Creating and Editing Metadata with FUAX Metadata Generator</h2>
+		<ol>
+			<li><b>Open the Metadata Generator:</b><br>Open <code>metagen.html</code> in your browser.</li>
+			<li><b>Generate Metadata:</b><br>Click <b>Generate All Metadata</b> to create 100 unique metadata entries for your NFTs. Each entry will have randomized traits (personality, digital affinity, energy level, etc.) with rarity weights.</li>
+			<li><b>Edit Metadata (Optional):</b><br>Click <b>Edit Metadata</b> to open the editor. Select an NFT number (1-100) to view and edit its details. Change the name, personality, digital affinity, energy level, special ability, or origin story as needed. Click <b>Save Changes</b> to update the entry.</li>
+			<li><b>Export Metadata:</b><br>The generated metadata appears in CSV format in the output box. Click <b>Download CSV</b> to save the metadata file. This file can be used for OpenSea Studio or other NFT platforms.</li>
+		</ol>
+	</div>
+
+	<div class="section">
+		<h2>3. Using FUAX Art & Metadata Apps Together</h2>
+		<ol>
+			<li><b>Generate Art:</b> Use Art Generator Studio to create your NFT images. Download/export the images.</li>
+			<li><b>Generate Metadata:</b> Use the Metadata Generator to create and edit metadata for each NFT. Download the CSV file.</li>
+			<li><b>Match Images and Metadata:</b> Ensure the order/numbering of images matches the metadata IDs (e.g., <code>image_001.png</code> matches metadata row with ID 1). You can edit names and traits in the metadata generator to match the visual style of each image.</li>
+			<li><b>Upload to NFT Platform:</b> Use OpenSea Studio or your preferred platform. Upload your images and import the metadata CSV. Follow the platform’s instructions to publish your collection.</li>
+		</ol>
+		<div class="tip">
+			<b>Tip:</b> For trait consistency, upload a metadata CSV to the art generator before creating images. Edit metadata after image generation for best results.
+		</div>
+	</div>
+
+	<div class="section">
+		<h2>FUAX Tips & Best Practices</h2>
+		<ul>
+			<li><b>Trait Consistency:</b> If you want specific traits to appear in both the image and metadata, upload a metadata CSV to the art generator before creating images.</li>
+			<li><b>Editing:</b> Use the metadata editor to fine-tune names and traits for each NFT after generating the initial set.</li>
+			<li><b>Backups:</b> Always keep backups of your images and metadata files.</li>
+			<li><b>Testing:</b> Preview your collection on OpenSea Studio before finalizing.</li>
+		</ul>
+	</div>
+
+	<div class="section">
+		<h2>Troubleshooting FUAX Tools</h2>
+		<ul>
+			<li><b>File Upload Issues:</b> Make sure you are using a modern browser and that file inputs are visible and clickable.</li>
+			<li><b>Image/Metadata Mismatch:</b> Double-check that image filenames and metadata IDs correspond.</li>
+			<li><b>Export Problems:</b> If downloads don’t work, try right-clicking the output and saving manually.</li>
+		</ul>
+	</div>
+
+	<div class="section">
+		<h2>FUAX Workflow Summary</h2>
+		<ul>
+			<li>Use the Art Generator Studio to create your NFT images.</li>
+			<li>Use the Metadata Generator to create and edit metadata for your NFTs.</li>
+			<li>Export both, match them up, and upload to your NFT platform.</li>
+		</ul>
+		<div class="tip">
+			If you need more advanced automation (like auto-matching images and metadata), reach out for help!
+		</div>
+	</div>
+</body>
+</html>
