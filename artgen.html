@@ -94,7 +94,7 @@
                     <!-- Number of Artworks -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Number of Artworks</label>
-                        <input type="number" min="1" max="1000" value="10" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <input type="number" min="1" max="5" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
 
                     <!-- Prompt Field -->
@@ -496,6 +496,36 @@
                 });
             });
 
+        function showSuccessMessage(message) {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
+            statusDiv.textContent = message;
+            document.body.appendChild(statusDiv);
+            setTimeout(() => {
+            statusDiv.remove();
+            }, 3000);
+        }
+
+        function showErrorMessage(message) {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
+            statusDiv.textContent = message;
+            document.body.appendChild(statusDiv);
+            setTimeout(() => {
+                statusDiv.remove();
+            }, 5000);
+        }
+
+       async function generateCollection() {
+    console.log('Generating collection with:', appState);
+    if (!appState.prompt) {
+        showErrorMessage('Please enter a prompt');
+        return;
+    }
+        statusDiv.remove();
+    }, 5000);
+}
+
             // Create UI for each trait type
             traitTypes.forEach(traitType => {
                 const values = new Set();
@@ -552,63 +582,72 @@
             }, 3000);
         }
 
-        async function generateCollection() {
-            console.log('Generating collection with:', appState);
-            if (!appState.prompt) {
-                showErrorMessage('Please enter a prompt');
-                return;
-            }
-            const samplesContainer = document.querySelector('.grid.grid-cols-3.gap-2');
-            samplesContainer.innerHTML = '';
-            document.getElementById('generation-status').classList.remove('hidden');
-            document.getElementById('progress').textContent = '0%';
+       async function generateCollection() {
+    console.log('Generating collection with:', appState);
+    if (!appState.prompt) {
+        showErrorMessage('Please enter a prompt');
+        return;
+    }
+    
+    const samplesContainer = document.querySelector('.grid.grid-cols-3.gap-2');
+    samplesContainer.innerHTML = '';
+    document.getElementById('generation-status').classList.remove('hidden');
+    document.getElementById('progress').textContent = '0%';
 
-            // Use backend proxy for Replicate API
-            const numImages = Math.min(appState.artworkCount, 6); // Limit to 6 for demo
-            let completed = 0;
-            for (let i = 0; i < numImages; i++) {
-                // Prepare payload for Replicate Stable Diffusion
-                const formData = {
-                    version: "a9758cb6b1e0e7c8e6e6e7e6e6e6e6e6e6e6e6e6e6e6e6e6", // Replace with your model version
-                    input: {
-                        prompt: appState.prompt,
-                        // Optionally add reference image if available
-                    }
-                };
-                if (appState.referenceImage) {
-                    // Convert image to base64
-                    const base64 = await fileToBase64(appState.referenceImage);
-                    formData.input.image = base64;
-                }
-                try {
-                    // Step 1: Start prediction
-                    const response = await fetch('/api/replicate', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(formData)
-                    });
-                    const data = await response.json();
-                    // Step 2: Poll for result
-                    let imageUrl = '';
-                    if (data && data.id) {
-                        imageUrl = await pollReplicateResultProxy(data.id);
-                    }
-                    samplesContainer.innerHTML += `
-                        <div class="artwork-card rounded-lg aspect-square bg-gray-100 flex items-center justify-center">
-                            ${imageUrl ? `<img src="${imageUrl}" class="h-full w-full object-contain rounded" alt="Generated">` : `<div class="text-xs text-gray-400">No image</div>`}
-                        </div>
-                    `;
-                } catch (err) {
-                    console.error('Replicate API error:', err);
-                    samplesContainer.innerHTML += `<div class="artwork-card rounded-lg aspect-square flex items-center justify-center text-xs text-red-500">Error</div>`;
-                }
-                completed++;
-                document.getElementById('progress').textContent = `${Math.round((completed/numImages)*100)}%`;
+    const numImages = Math.min(appState.artworkCount, 50); // Limit to 50 for demo
+    let completed = 0;
+    
+    for (let i = 0; i < numImages; i++) {
+        try {
+            // Show loading placeholder
+            samplesContainer.innerHTML += `
+                <div class="artwork-card rounded-lg aspect-square bg-gray-100 flex items-center justify-center" id="loading-${i}">
+                    <div class="text-xs text-gray-400">Generating...</div>
+                </div>
+            `;
+
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    prompt: appState.prompt,
+                    width: 512,
+                    height: 512,
+                    steps: 20, // Faster generation
+                    cfg_scale: 7
+                })
+            });
+
+            const data = await response.json();
+            
+            // Replace loading placeholder
+            const loadingElement = document.getElementById(`loading-${i}`);
+            if (data.success && loadingElement) {
+                loadingElement.innerHTML = `
+                    <img src="${data.imageUrl}" class="h-full w-full object-contain rounded" alt="Generated NFT">
+                `;
+                loadingElement.classList.remove('bg-gray-100');
+            } else if (loadingElement) {
+                loadingElement.innerHTML = `<div class="text-xs text-red-500">Failed</div>`;
             }
-            document.getElementById('generation-status').classList.add('hidden');
+            
+        } catch (err) {
+            console.error('Generation error:', err);
+            const loadingElement = document.getElementById(`loading-${i}`);
+            if (loadingElement) {
+                loadingElement.innerHTML = `<div class="text-xs text-red-500">Error</div>`;
+            }
         }
+        
+        completed++;
+        document.getElementById('progress').textContent = `${Math.round((completed/numImages)*100)}%`;
+    }
+    
+    document.getElementById('generation-status').classList.add('hidden');
+    showSuccessMessage('Collection generation complete!');
+}
 
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
