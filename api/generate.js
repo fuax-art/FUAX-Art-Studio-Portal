@@ -1,12 +1,10 @@
 export default async function handler(req, res) {
-  // Enable CORS for frontend requests
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
@@ -18,13 +16,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Stability API key not configured' });
   }
 
-  const { 
-    prompt, 
-    width = 512, 
-    height = 512,
-    steps = 20,
-    cfg_scale = 7
-  } = req.body;
+  const { prompt, width = 512, height = 512, steps = 20, cfg_scale = 7 } = req.body;
 
   if (!prompt) {
     return res.status(400).json({ error: 'Prompt is required' });
@@ -39,12 +31,7 @@ export default async function handler(req, res) {
         'Accept': 'application/json',
       },
       body: JSON.stringify({
-        text_prompts: [
-          {
-            text: prompt,
-            weight: 1
-          }
-        ],
+        text_prompts: [{ text: prompt, weight: 1 }],
         cfg_scale: cfg_scale,
         height: height,
         width: width,
@@ -56,7 +43,6 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('Stability API Error:', response.status, errorData);
       return res.status(response.status).json({ 
         error: 'Stability API request failed',
         details: errorData 
@@ -66,21 +52,19 @@ export default async function handler(req, res) {
     const data = await response.json();
     
     if (data.artifacts && data.artifacts[0]) {
-      // Convert base64 to data URL
       const base64Image = data.artifacts[0].base64;
       const dataUrl = `data:image/png;base64,${base64Image}`;
       
-      res.json({ 
+      return res.json({ 
         success: true, 
         imageUrl: dataUrl,
         seed: data.artifacts[0].seed
       });
     } else {
-      res.status(500).json({ error: 'No image generated from Stability AI' });
+      return res.status(500).json({ error: 'No image generated from Stability AI' });
     }
   } catch (error) {
-    console.error('Generation error:', error);
-    res.status(500).json({ 
+    return res.status(500).json({ 
       error: 'Image generation failed', 
       details: error.message 
     });

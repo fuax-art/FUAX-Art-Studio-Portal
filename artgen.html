@@ -438,87 +438,49 @@
         }, 5000);
     }
 
-   async function generateCollection() {
+  async function generateCollection() {
     console.log('Generate button clicked!');
-    console.log('App state:', appState);
     
     if (!appState.prompt) {
-        console.log('No prompt provided');
         showErrorMessage('Please enter a prompt');
         return;
     }
     
-    console.log('About to start generation loop');
-    // ... rest of your function
-}
-        console.log('Generating collection with:', appState);
-        if (!appState.prompt) {
-            showErrorMessage('Please enter a prompt');
-            return;
-        }
-        
-        const samplesContainer = document.querySelector('.grid.grid-cols-3.gap-2');
-        samplesContainer.innerHTML = '';
-        document.getElementById('generation-status').classList.remove('hidden');
-        document.getElementById('progress').textContent = '0%';
-
-        const numImages = Math.min(appState.artworkCount, 5); // Matches your max input
-        let completed = 0;
-        
-        for (let i = 0; i < numImages; i++) {
-            try {
-                // Show loading placeholder
-                samplesContainer.innerHTML += `
-                    <div class="artwork-card rounded-lg aspect-square bg-gray-200 flex items-center justify-center" id="loading-${i}">
-                        <div class="text-xs text-gray-600">Generating...</div>
-                    </div>
-                `;
-
-                console.log('Sending request to /api/generate');
-                const response = await fetch('/api/generate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        prompt: appState.prompt,
-                        width: 512,
-                        height: 512,
-                        steps: 20,
-                        cfg_scale: 7
-                    })
-                });
-
-                console.log('Response status:', response.status);
-                const data = await response.json();
-                console.log('Response data:', data);
-                
-                // Replace loading placeholder
-                const loadingElement = document.getElementById(`loading-${i}`);
-                if (data.success && loadingElement) {
-                    loadingElement.innerHTML = `
-                        <img src="${data.imageUrl}" class="h-full w-full object-contain rounded" alt="Generated NFT">
-                    `;
-                    loadingElement.classList.remove('bg-gray-200');
-                } else if (loadingElement) {
-                    loadingElement.innerHTML = `<div class="text-xs text-red-500">Failed: ${data.error || 'Unknown error'}</div>`;
-                }
-                
-            } catch (err) {
-                console.error('Generation error:', err);
-                const loadingElement = document.getElementById(`loading-${i}`);
-                if (loadingElement) {
-                    loadingElement.innerHTML = `<div class="text-xs text-red-500">Error: ${err.message}</div>`;
-                }
-            }
-            
-            completed++;
-            document.getElementById('progress').textContent = `${Math.round((completed/numImages)*100)}%`;
-        }
-        
-        document.getElementById('generation-status').classList.add('hidden');
-        showSuccessMessage('Collection generation complete!');
+    const samplesContainer = document.querySelector('.grid.grid-cols-3.gap-2');
+    samplesContainer.innerHTML = '';
+    document.getElementById('generation-status').classList.remove('hidden');
     
+    try {
+        const response = await fetch('/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                prompt: appState.prompt,
+                width: 512,
+                height: 512
+            })
+        });
+
+        const data = await response.json();
+        console.log('API response:', data);
+        
+        if (data.success) {
+            samplesContainer.innerHTML = `
+                <div class="artwork-card rounded-lg aspect-square">
+                    <img src="${data.imageUrl}" class="h-full w-full object-contain rounded" alt="Generated">
+                </div>
+            `;
+            showSuccessMessage('Generation complete!');
+        } else {
+            showErrorMessage(`Failed: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showErrorMessage(`Error: ${error.message}`);
+    }
+    
+    document.getElementById('generation-status').classList.add('hidden');
+}
 </script>
 </body>
 </html>
