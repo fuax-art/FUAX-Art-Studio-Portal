@@ -437,7 +437,19 @@
         }, 5000);
     }
 
-    async function generateCollection() {
+   async function generateCollection() {
+    console.log('Generate button clicked!');
+    console.log('App state:', appState);
+    
+    if (!appState.prompt) {
+        console.log('No prompt provided');
+        showErrorMessage('Please enter a prompt');
+        return;
+    }
+    
+    console.log('About to start generation loop');
+    // ... rest of your function
+}
         console.log('Generating collection with:', appState);
         if (!appState.prompt) {
             showErrorMessage('Please enter a prompt');
@@ -505,7 +517,7 @@
         
         document.getElementById('generation-status').classList.add('hidden');
         showSuccessMessage('Collection generation complete!');
-    }
+    
 </script>
 </body>
 </html>
