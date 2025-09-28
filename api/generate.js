@@ -16,8 +16,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Stability API key not configured' });
   }
 
-  const { prompt, width = 512, height = 512, steps = 20, cfg_scale = 7 } = req.body;
-
+1024
   if (!prompt) {
     return res.status(400).json({ error: 'Prompt is required' });
   }
