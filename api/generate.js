@@ -13,12 +13,13 @@ export default async function handler(req, res) {
 
   const stabilityKey = process.env.STABILITY_API_KEY;
   if (!stabilityKey) {
-    return res.status(500).json({ error: 'Stability API key not configured' });
+    return res.status(500).json({ error: 'API key not configured' });
   }
 
-1024
+  const { prompt, width = 1024, height = 1024, steps = 20, cfg_scale = 7 } = req.body;
+
   if (!prompt) {
-    return res.status(400).json({ error: 'Prompt is required' });
+    return res.status(400).json({ error: 'Prompt required' });
   }
 
   try {
@@ -40,31 +41,45 @@ export default async function handler(req, res) {
       })
     });
 
+    const responseText = await response.text();
+    
     if (!response.ok) {
-      const errorData = await response.text();
-      return res.status(response.status).json({ 
-        error: 'Stability API request failed',
-        details: errorData 
+      return res.status(200).json({ 
+        success: false,
+        error: `API Error ${response.status}`,
+        details: responseText
       });
     }
 
-    const data = await response.json();
+    // Try to parse JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      return res.status(200).json({ 
+        success: false,
+        error: 'Invalid JSON response',
+        details: responseText.substring(0, 200)
+      });
+    }
     
     if (data.artifacts && data.artifacts[0]) {
       const base64Image = data.artifacts[0].base64;
-      const dataUrl = `data:image/png;base64,${base64Image}`;
-      
       return res.json({ 
         success: true, 
-        imageUrl: dataUrl,
-        seed: data.artifacts[0].seed
+        imageUrl: `data:image/png;base64,${base64Image}`
       });
     } else {
-      return res.status(500).json({ error: 'No image generated from Stability AI' });
+      return res.json({ 
+        success: false, 
+        error: 'No image in response',
+        details: JSON.stringify(data)
+      });
     }
   } catch (error) {
-    return res.status(500).json({ 
-      error: 'Image generation failed', 
+    return res.json({ 
+      success: false, 
+      error: 'Request failed', 
       details: error.message 
     });
   }
