@@ -261,7 +261,7 @@
                     
                     <div>
                         <h3 class="text-sm font-medium text-gray-700 mb-2">Sample Outputs</h3>
-                        <div class="grid grid-cols-3 gap-2">
+                        <div class="grid grid-cols-3 gap-2"id="preview-grid"></div>>
                             <div class="artwork-card bg-gray-100 rounded-lg aspect-square flex items-center justify-center text-xs text-gray-400">Sample 1</div>
                             <div class="artwork-card bg-gray-100 rounded-lg aspect-square flex items-center justify-center text-xs text-gray-400">Sample 2</div>
                             <div class="artwork-card bg-gray-100 rounded-lg aspect-square flex items-center justify-center text-xs text-gray-400">Sample 3</div>
@@ -409,7 +409,7 @@
     }
 
     async function generateCollection() {
-        const samplesContainer = document.querySelector('.grid.grid-cols-3.gap-2');
+        const samplesContainer = document.getElementById('preview-grid');
         samplesContainer.innerHTML = '';
         document.getElementById('generation-status').classList.remove('hidden');
         
