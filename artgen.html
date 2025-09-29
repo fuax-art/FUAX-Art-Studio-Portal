@@ -465,7 +465,12 @@
                 } else if (loadingElement) {
                     loadingElement.innerHTML = `<div class="text-xs text-red-500">Failed</div>`;
                 }
-                
+    
+            // Add this part to show in main preview:
+                 if (i === 0) {
+                  const mainPreview = document.querySelector('.border-dashed.border-gray-300');
+                 mainPreview.innerHTML = `<img src="${data.imageUrl}" class="h-full w-full object-contain" alt="Main Preview">`;
+               }
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -475,20 +480,9 @@
         
         document.getElementById('generation-status').classList.add('hidden');
         showSuccessMessage('Collection generation complete!');
-        // Inside your generateCollection function, after the image renders successfully:
-if (data.success && loadingElement) {
-    loadingElement.innerHTML = `
-        <img src="${data.imageUrl}" class="h-full w-full object-contain rounded" alt="Generated NFT ${i+1}">
-    `;
-    loadingElement.classList.remove('bg-gray-200');
-    
-    // Add this part to show in main preview:
-    if (i === 0) {
-        const mainPreview = document.querySelector('.border-dashed.border-gray-300');
-        mainPreview.innerHTML = `<img src="${data.imageUrl}" class="h-full w-full object-contain" alt="Main Preview">`;
-    }
+        
 }
-    }
+    
 </script>
 </body>
 </html>
