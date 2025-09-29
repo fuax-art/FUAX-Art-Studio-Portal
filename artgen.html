@@ -9,43 +9,82 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
-    <style>
-        .layer-preview {
-            transition: all 0.3s ease;
-        }
-        .layer-preview:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 25px rgba(12, 212, 212, 0.903);
-        }
-        .artwork-card {
-            transition: all 0.3s ease;
-        }
-        .artwork-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(4, 224, 206, 0.835);
-        }
-        .trait-selector {
-            scrollbar-width: thin;
-            scrollbar-color: #6366f1 #e0e7ff;
-        }
-        .trait-selector::-webkit-scrollbar {
-            width: 8px;
-        }
-        .trait-selector::-webkit-scrollbar-track {
-            background: #020202;
-        }
-        .trait-selector::-webkit-scrollbar-thumb {
-            background-color: #6366f1;
-            border-radius: 20px;
-        }
-    </style>
+   <style>
+    body {
+        background: #000000;
+    }
+    .layer-preview {
+        transition: all 0.3s ease;
+        background: rgba(0, 0, 0, 0.6);
+        color: #00ffff;
+    }
+    .layer-preview:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 25px rgba(0, 255, 255, 0.5);
+        background: rgba(205, 92, 40, 0.8);
+    }
+    .artwork-card {
+        transition: all 0.3s ease;
+        background: rgba(0, 0, 0, 0.85);
+    }
+    .artwork-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 255, 255, 0.6);
+    }
+    .trait-selector {
+        scrollbar-width: thin;
+        scrollbar-color: #cd5c28 #000;
+    }
+    .trait-selector::-webkit-scrollbar {
+        width: 8px;
+    }
+    .trait-selector::-webkit-scrollbar-track {
+        background: #000000;
+    }
+    .trait-selector::-webkit-scrollbar-thumb {
+        background-color: #cd5c28;
+        border-radius: 20px;
+    }
+    /* Transparent panels */
+    .bg-white {
+        background: rgba(0, 0, 0, 0.85) !important;
+        color: #00ffff !important;
+    }
+    /* Text colors */
+    .text-gray-800, .text-gray-700, .text-gray-900 {
+        color: #00ffff !important;
+    }
+    .text-gray-500, .text-gray-400, .text-gray-600 {
+        color: #00cccc !important;
+    }
+    /* Buttons */
+    .bg-indigo-600 {
+        background: #cd5c28 !important;
+    }
+    .bg-indigo-600:hover {
+        background: #b34a20 !important;
+    }
+    /* Input fields */
+    input, textarea, select {
+        background: rgba(0, 0, 0, 0.7) !important;
+        color: #00ffff !important;
+        border-color: #cd5c28 !important;
+    }
+    input::placeholder, textarea::placeholder {
+        color: #00cccc !important;
+    }
+    /* Border colors */
+    .border-gray-300, .border-gray-200 {
+        border-color: #cd5c28 !important;
+    }
+</style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-slate-800">
     <div id="vanta-bg" class="fixed inset-0 -z-10 opacity-20"></div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.globe.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
     <script>
-        VANTA.GLOBE({
+        VANTA.NET({
             el: "#vanta-bg",
             mouseControls: true,
             touchControls: true,
@@ -54,8 +93,12 @@
             minWidth: 200.00,
             scale: 1.00,
             scaleMobile: 1.00,
-            color: 0x6366f1,
-            backgroundColor: 0xf8fafc
+            color: 0xfeff,
+            backgroundColor: 0x0,
+            points: 9.00,
+            maxDistance: 23.00,
+            spacing: 16.00,
+            showDots: false
         })
     </script>
 
@@ -86,56 +129,34 @@
                 </h2>
                 
                 <div class="space-y-6">
-                    <!-- Collection Name -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Collection Name</label>
                         <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="My Awesome Collection">
                     </div>
                     
-                    <!-- Number of Artworks -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Number of Artworks</label>
                         <input type="number" min="1" max="5" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
 
-                    <!-- Prompt Field -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Prompt</label>
                         <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Describe the artwork you want to generate"></textarea>
                     </div>
-                    <div id="traits-preview" class="hidden">
-    <label class="block text-sm font-medium text-gray-700 mb-1">Selected Traits</label>
-    <div class="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm" id="traits-display">
-        No traits selected
-    </div>
-</div>
-Add trait display update function:
-function updateTraitsDisplay() {
-    const traitsPreview = document.getElementById('traits-preview');
-    const traitsDisplay = document.getElementById('traits-display');
-    
-    if (Object.keys(appState.selectedTraits).length > 0) {
-        traitsPreview.classList.remove('hidden');
-        const traitText = Object.entries(appState.selectedTraits)
-            .map(([type, value]) => `${type}: ${value}`)
-            .join(', ');
-        traitsDisplay.textContent = traitText;
-    } else {
-        traitsPreview.classList.add('hidden');
-    }
-}
 
-// Update the trait selection event listener to call this:
-document.addEventListener('click', (event) => {
-    if (event.target.closest('.layer-preview')) {
+                    <div id="traits-preview" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Selected Traits</label>
+                        <div class="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm" id="traits-display">
+                            No traits selected
+                        </div>
+                    </div>
                     
-                    <!-- Metadata Upload -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Collection Data (.json or .csv)</label>
                         <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                             <div class="space-y-1 text-center">
                                 <div class="flex text-sm text-gray-600">
-                                    <label class="relative cursor-crosshair bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none">
+                                    <label class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none">
                                         <span>Upload metadata</span>
                                         <input id="metadata-file" type="file" accept=".json,.csv" class="sr-only">
                                     </label>
@@ -145,7 +166,6 @@ document.addEventListener('click', (event) => {
                         </div>
                     </div>
                     
-                    <!-- Generate Button -->
                     <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center justify-center font-medium transition-colors duration-200">
                         <i data-feather="zap" class="mr-2"></i> Generate Collection
                     </button>
@@ -162,7 +182,6 @@ document.addEventListener('click', (event) => {
                 </h2>
                 
                 <div class="space-y-4">
-                    <!-- Add New Trait -->
                     <div class="flex justify-between items-center">
                         <h3 class="text-lg font-medium text-gray-700">Traits</h3>
                         <button class="text-indigo-600 hover:text-indigo-800 flex items-center text-sm">
@@ -170,9 +189,7 @@ document.addEventListener('click', (event) => {
                         </button>
                     </div>
                     
-                    <!-- Trait Categories -->
                     <div class="space-y-4 max-h-96 overflow-y-auto trait-selector p-2">
-                        <!-- Background -->
                         <div class="border border-gray-200 rounded-lg p-3">
                             <div class="flex justify-between items-center">
                                 <h4 class="font-medium text-gray-700">Background</h4>
@@ -181,16 +198,15 @@ document.addEventListener('click', (event) => {
                                 </button>
                             </div>
                             <div class="mt-2 grid grid-cols-3 gap-2">
-                                <div class="layer-preview bg-blue-100 rounded p-1 text-center text-xs cursor-crosshair">Blue</div>
-                                <div class="layer-preview bg-red-100 rounded p-1 text-center text-xs cursor-crosshair">Red</div>
-                                <div class="layer-preview bg-green-100 rounded p-1 text-center text-xs cursor-crosshair">Green</div>
-                                <div class="layer-preview bg-yellow-100 rounded p-1 text-center text-xs cursor-crosshair">Yellow</div>
-                                <div class="layer-preview bg-purple-100 rounded p-1 text-center text-xs cursor-crosshair">Magenta</div>
-                                <div class="layer-preview bg-pink-100 rounded p-1 text-center text-xs cursor-crosshair">Cyan</div>
+                                <div class="layer-preview bg-blue-100 rounded p-1 text-center text-xs cursor-pointer">Blue</div>
+                                <div class="layer-preview bg-red-100 rounded p-1 text-center text-xs cursor-pointer">Red</div>
+                                <div class="layer-preview bg-green-100 rounded p-1 text-center text-xs cursor-pointer">Green</div>
+                                <div class="layer-preview bg-yellow-100 rounded p-1 text-center text-xs cursor-pointer">Yellow</div>
+                                <div class="layer-preview bg-purple-100 rounded p-1 text-center text-xs cursor-pointer">Magenta</div>
+                                <div class="layer-preview bg-pink-100 rounded p-1 text-center text-xs cursor-pointer">Cyan</div>
                             </div>
                         </div>
                         
-                        <!-- Character -->
                         <div class="border border-gray-200 rounded-lg p-3">
                             <div class="flex justify-between items-center">
                                 <h4 class="font-medium text-gray-700">Character</h4>
@@ -199,16 +215,15 @@ document.addEventListener('click', (event) => {
                                 </button>
                             </div>
                             <div class="mt-2 grid grid-cols-3 gap-2">
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-crosshair">Human</div>
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-crosshair">Robot</div>
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-crosshair">Alien</div>
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-crosshair">Animal</div>
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-crosshair">Monster</div>
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-crosshair">Ghost</div>
+                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">Human</div>
+                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">Robot</div>
+                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">Alien</div>
+                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">Animal</div>
+                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">Monster</div>
+                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">Ghost</div>
                             </div>
                         </div>
                         
-                        <!-- Accessories -->
                         <div class="border border-gray-200 rounded-lg p-3">
                             <div class="flex justify-between items-center">
                                 <h4 class="font-medium text-gray-700">Accessories</h4>
@@ -217,40 +232,12 @@ document.addEventListener('click', (event) => {
                                 </button>
                             </div>
                             <div class="mt-2 grid grid-cols-3 gap-2">
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-crosshair">Beanie</div>
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-crosshair">Sun Glasses</div>
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-crosshair">Brass Knuckles</div>
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-crosshair">Hoodie</div>
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-crosshair">Baseball Bat</div>
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-crosshair">None</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Rarity Controls -->
-                        <div class="border border-gray-200 rounded-lg p-3">
-                            <div class="flex justify-between items-center">
-                                <h4 class="font-medium text-gray-700">Rarity Controls</h4>
-                                <button class="text-gray-400 hover:text-gray-600">
-                                    <i data-feather="chevron-down" class="h-4 w-4"></i>
-                                </button>
-                            </div>
-                            <div class="mt-2 space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm">Common</span>
-                                    <input type="range" min="1" max="100" value="70" class="w-24">
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm">Uncommon</span>
-                                    <input type="range" min="1" max="100" value="20" class="w-24">
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm">Rare</span>
-                                    <input type="range" min="1" max="100" value="8" class="w-24">
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm">Legendary</span>
-                                    <input type="range" min="1" max="100" value="2" class="w-24">
-                                </div>
+                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">Beanie</div>
+                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">Sun Glasses</div>
+                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">Brass Knuckles</div>
+                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">Hoodie</div>
+                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">Baseball Bat</div>
+                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">None</div>
                             </div>
                         </div>
                     </div>
@@ -264,7 +251,6 @@ document.addEventListener('click', (event) => {
                 </h2>
                 
                 <div class="space-y-4">
-                    <!-- Current Preview -->
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 flex items-center justify-center h-64">
                         <div class="text-center">
                             <i data-feather="image" class="mx-auto h-12 w-12 text-gray-400"></i>
@@ -273,7 +259,6 @@ document.addEventListener('click', (event) => {
                         </div>
                     </div>
                     
-                    <!-- Generated Samples -->
                     <div>
                         <h3 class="text-sm font-medium text-gray-700 mb-2">Sample Outputs</h3>
                         <div class="grid grid-cols-3 gap-2">
@@ -283,22 +268,6 @@ document.addEventListener('click', (event) => {
                             <div class="artwork-card bg-gray-100 rounded-lg aspect-square flex items-center justify-center text-xs text-gray-400">Sample 4</div>
                             <div class="artwork-card bg-gray-100 rounded-lg aspect-square flex items-center justify-center text-xs text-gray-400">Sample 5</div>
                             <div class="artwork-card bg-gray-100 rounded-lg aspect-square flex items-center justify-center text-xs text-gray-400">Sample 6</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Export Options -->
-                    <div class="pt-4">
-                        <h3 class="text-sm font-medium text-gray-700 mb-2">Export Options</h3>
-                        <div class="flex space-x-2">
-                            <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm font-medium flex items-center justify-center">
-                                <i data-feather="download" class="mr-2 h-4 w-4"></i> PNG
-                            </button>
-                            <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm font-medium flex items-center justify-center">
-                                <i data-feather="download" class="mr-2 h-4 w-4"></i> JSON
-                            </button>
-                            <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm font-medium flex items-center justify-center">
-                                <i data-feather="download" class="mr-2 h-4 w-4"></i> CSV
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -316,9 +285,6 @@ document.addEventListener('click', (event) => {
                     <a href="#" class="text-gray-400 hover:text-gray-500">
                         <i data-feather="twitter"></i>
                     </a>
-                    <a href="#" class="text-gray-400 hover:text-gray-500">
-                        <i data-feather="discord"></i>
-                    </a>
                 </div>
                 <div class="mt-8 md:mt-0 md:order-1 text-center">
                     <img src="branding/fuax-logo.png" alt="Forever Unfinished Artworx Logo" style="width:32px; height:auto; display:inline-block; vertical-align:middle; margin-right:8px; background:none; border:none; box-shadow:none; filter:none;" onerror="this.style.display='none'">
@@ -335,30 +301,15 @@ document.addEventListener('click', (event) => {
     AOS.init();
     feather.replace();
     
-    // Global state
     const appState = {
         collectionName: '',
         artworkCount: 1,
         prompt: '',
-        referenceImage: null,
         metadataFile: null,
-        traits: {
-            background: ['Blue', 'Red', 'Green', 'Yellow', 'Purple', 'Pink'],
-            character: ['Human', 'Robot', 'Alien', 'Animal', 'Monster', 'Ghost'],
-            accessories: ['Hat', 'Glasses', 'Necklace', 'Hoodie', 'Ring', 'None'],
-            rarities: [70, 20, 8, 2]
-        },
         selectedTraits: {}
     };
 
-    // Initialize UI
     document.addEventListener('DOMContentLoaded', () => {
-        // Bind file uploads
-        document.getElementById('reference-image').addEventListener('change', (e) => {
-            appState.referenceImage = e.target.files[0];
-            updatePreview();
-        });
-
         const metadataInput = document.getElementById('metadata-file');
         metadataInput.addEventListener('change', (e) => {
             appState.metadataFile = e.target.files[0];
@@ -367,71 +318,86 @@ document.addEventListener('click', (event) => {
             }
         });
 
-        // Bind collection name
         document.querySelector('input[placeholder="My Awesome Collection"]').addEventListener('input', (e) => {
             appState.collectionName = e.target.value;
         });
 
-        // Bind artwork count
         document.querySelector('input[type="number"]').addEventListener('input', (e) => {
             appState.artworkCount = parseInt(e.target.value) || 1;
         });
 
-        // Bind prompt field
         document.querySelector('textarea').addEventListener('input', (e) => {
             appState.prompt = e.target.value;
         });
 
-        // Bind generate button
         document.querySelector('button.bg-indigo-600').addEventListener('click', generateCollection);
     });
 
-    function updatePreview() {
-        const preview = document.querySelector('.border-dashed.border-gray-300');
-        if (appState.referenceImage) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                preview.innerHTML = `<img src="${e.target.result}" class="h-full w-full object-contain" alt="Preview">`;
-            };
-            reader.readAsDataURL(appState.referenceImage);
+    // Trait selection handling
+    document.addEventListener('click', (event) => {
+        if (event.target.closest('.layer-preview')) {
+            const item = event.target.closest('.layer-preview');
+            const traitSection = item.closest('.border-gray-200');
+            const traitType = traitSection.querySelector('h4').textContent.toLowerCase();
+            const traitValue = item.textContent.trim();
+            
+            traitSection.querySelectorAll('.layer-preview').forEach(el => {
+                el.classList.remove('ring-2', 'ring-indigo-500', 'bg-indigo-100');
+            });
+            
+            item.classList.add('ring-2', 'ring-indigo-500', 'bg-indigo-100');
+            appState.selectedTraits[traitType] = traitValue;
+            
+            updateTraitsDisplay();
+        }
+    });
+
+    function updateTraitsDisplay() {
+        const traitsPreview = document.getElementById('traits-preview');
+        const traitsDisplay = document.getElementById('traits-display');
+        
+        if (Object.keys(appState.selectedTraits).length > 0) {
+            traitsPreview.classList.remove('hidden');
+            const traitText = Object.entries(appState.selectedTraits)
+                .map(([type, value]) => `${type}: ${value}`)
+                .join(', ');
+            traitsDisplay.textContent = traitText;
+        } else {
+            traitsPreview.classList.add('hidden');
         }
     }
 
-   function parseMetadata() {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            const content = e.target.result;
-            if (appState.metadataFile.name.endsWith('.csv')) {
-                const lines = content.split('\n');
-                const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-                window.csvData = lines.slice(1).map(line => {
-                    const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
-                    return headers.reduce((obj, header, i) => {
-                        obj[header] = values[i] || '';
-                        return obj;
-                    }, {});
-                }).filter(row => Object.values(row).some(val => val)); // Remove empty rows
-                
-                console.log('Loaded CSV data:', window.csvData);
-                showSuccessMessage(`Loaded ${window.csvData.length} entries from CSV`);
+    function parseMetadata() {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const content = e.target.result;
+                if (appState.metadataFile.name.endsWith('.csv')) {
+                    const lines = content.split('\n');
+                    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                    window.csvData = lines.slice(1).map(line => {
+                        const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+                        return headers.reduce((obj, header, i) => {
+                            obj[header] = values[i] || '';
+                            return obj;
+                        }, {});
+                    }).filter(row => Object.values(row).some(val => val));
+                    
+                    showSuccessMessage(`Loaded ${window.csvData.length} entries from CSV`);
+                }
+            } catch (error) {
+                showErrorMessage('Failed to parse collection data file');
             }
-        } catch (error) {
-            console.error('Error parsing metadata:', error);
-            showErrorMessage('Failed to parse collection data file');
-        }
-    };
-    reader.readAsText(appState.metadataFile);
-}
+        };
+        reader.readAsText(appState.metadataFile);
+    }
 
     function showSuccessMessage(message) {
         const statusDiv = document.createElement('div');
         statusDiv.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
         statusDiv.textContent = message;
         document.body.appendChild(statusDiv);
-        setTimeout(() => {
-            statusDiv.remove();
-        }, 3000);
+        setTimeout(() => statusDiv.remove(), 3000);
     }
 
     function showErrorMessage(message) {
@@ -439,110 +405,77 @@ document.addEventListener('click', (event) => {
         statusDiv.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
         statusDiv.textContent = message;
         document.body.appendChild(statusDiv);
-        setTimeout(() => {
-            statusDiv.remove();
-        }, 5000);
+        setTimeout(() => statusDiv.remove(), 5000);
     }
 
-  async function generateCollection() {
-    console.log('Generate button clicked!');
-    
-    const samplesContainer = document.querySelector('.grid.grid-cols-3.gap-2');
-    samplesContainer.innerHTML = '';
-    document.getElementById('generation-status').classList.remove('hidden');
-    
-    let prompts = [];
-    
-    // Build prompt from selected traits
-    let traitPrompt = '';
-    if (Object.keys(appState.selectedTraits).length > 0) {
-        traitPrompt = Object.values(appState.selectedTraits).join(' ') + ' ';
-    }
-    
-    // If CSV uploaded, combine traits with CSV data
-    if (appState.metadataFile && window.csvData) {
-        prompts = window.csvData.slice(0, appState.artworkCount).map(item => {
-            let csvPrompt = `${item.Personality || ''} ${item['Digital Affinity'] || ''} ${item['Energy Level'] || ''}`.trim();
-            return `${traitPrompt}${csvPrompt} ${appState.prompt}`.trim();
-        });
-    } else {
-        // Use selected traits + manual prompt
-        const finalPrompt = `${traitPrompt}${appState.prompt}`.trim();
-        prompts = Array(appState.artworkCount).fill(finalPrompt);
-    }
-    
-    if (prompts.length === 0 || prompts[0].trim() === '') {
-        showErrorMessage('Please enter a prompt or select traits');
-        document.getElementById('generation-status').classList.add('hidden');
-        return;
-    }
-    
-    for (let i = 0; i < prompts.length; i++) {
-        try {
-            samplesContainer.innerHTML += `
-                <div class="artwork-card rounded-lg aspect-square bg-gray-200 flex items-center justify-center" id="loading-${i}">
-                    <div class="text-xs text-gray-600">Generating ${i+1}...</div>
-                </div>
-            `;
-
-            const response = await fetch('/api/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    prompt: prompts[i],
-                    width: 1024,
-                    height: 1024
-                })
-            });
-
-            const data = await response.json();
-            console.log(`Prompt ${i+1}:`, prompts[i]);
-            
-            const loadingElement = document.getElementById(`loading-${i}`);
-            if (data.success && loadingElement) {
-                loadingElement.innerHTML = `
-                    <img src="${data.imageUrl}" class="h-full w-full object-contain rounded" alt="Generated NFT ${i+1}">
-                `;
-                loadingElement.classList.remove('bg-gray-200');
-            } else if (loadingElement) {
-                loadingElement.innerHTML = `<div class="text-xs text-red-500">Failed</div>`;
-            }
-            
-        } catch (error) {
-            console.error('Error:', error);
+    async function generateCollection() {
+        const samplesContainer = document.querySelector('.grid.grid-cols-3.gap-2');
+        samplesContainer.innerHTML = '';
+        document.getElementById('generation-status').classList.remove('hidden');
+        
+        let prompts = [];
+        let traitPrompt = '';
+        
+        if (Object.keys(appState.selectedTraits).length > 0) {
+            traitPrompt = Object.values(appState.selectedTraits).join(' ') + ' ';
         }
         
-        document.getElementById('progress').textContent = `${Math.round(((i+1)/prompts.length)*100)}%`;
-    }
-    
-    document.getElementById('generation-status').classList.add('hidden');
-    showSuccessMessage('Collection generation complete!');
+        if (appState.metadataFile && window.csvData) {
+            prompts = window.csvData.slice(0, appState.artworkCount).map(item => {
+                let csvPrompt = `${item.Personality || ''} ${item['Digital Affinity'] || ''} ${item['Energy Level'] || ''}`.trim();
+                return `${traitPrompt}${csvPrompt} ${appState.prompt}`.trim();
+            });
+        } else {
+            const finalPrompt = `${traitPrompt}${appState.prompt}`.trim();
+            prompts = Array(appState.artworkCount).fill(finalPrompt);
+        }
+        
+        if (prompts.length === 0 || prompts[0].trim() === '') {
+            showErrorMessage('Please enter a prompt or select traits');
+            document.getElementById('generation-status').classList.add('hidden');
+            return;
+        }
+        
+        for (let i = 0; i < prompts.length; i++) {
+            try {
+                samplesContainer.innerHTML += `
+                    <div class="artwork-card rounded-lg aspect-square bg-gray-200 flex items-center justify-center" id="loading-${i}">
+                        <div class="text-xs text-gray-600">Generating ${i+1}...</div>
+                    </div>
+                `;
 
-    document.addEventListener('click', (event) => {
-    if (event.target.closest('.layer-preview')) {
-        const item = event.target.closest('.layer-preview');
-        const traitSection = item.closest('.border-gray-200');
-        const traitType = traitSection.querySelector('h4').textContent.toLowerCase();
-        const traitValue = item.textContent.trim();
-        
-        // Clear previous selections in this category
-        traitSection.querySelectorAll('.layer-preview').forEach(el => {
-            el.classList.remove('ring-2', 'ring-indigo-500', 'bg-indigo-100');
-        });
-        
-        // Highlight selected trait
-        item.classList.add('ring-2', 'ring-indigo-500', 'bg-indigo-100');
-        
-        // Store selection
-        appState.selectedTraits[traitType] = traitValue;
-        
-        console.log('Selected traits:', appState.selectedTraits);
-    }
-            updateTraitsDisplay();
-    }
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt: prompts[i],
+                        width: 1024,
+                        height: 1024
+                    })
+                });
 
-);
-}
+                const data = await response.json();
+                
+                const loadingElement = document.getElementById(`loading-${i}`);
+                if (data.success && loadingElement) {
+                    loadingElement.innerHTML = `
+                        <img src="${data.imageUrl}" class="h-full w-full object-contain rounded" alt="Generated NFT ${i+1}">
+                    `;
+                    loadingElement.classList.remove('bg-gray-200');
+                } else if (loadingElement) {
+                    loadingElement.innerHTML = `<div class="text-xs text-red-500">Failed</div>`;
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+            }
+            
+            document.getElementById('progress').textContent = `${Math.round(((i+1)/prompts.length)*100)}%`;
+        }
+        
+        document.getElementById('generation-status').classList.add('hidden');
+        showSuccessMessage('Collection generation complete!');
+    }
 </script>
 </body>
 </html>
