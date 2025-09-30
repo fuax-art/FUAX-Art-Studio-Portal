@@ -177,12 +177,30 @@
             event.target.classList.add('active');
         }
 
-        function generateRandomName() {
-            const prefixes = ["Cyber", "Neo", "Quantum", "Void", "Stellar", "Digital", "Plasma", "Neon", "Glitch", "Flux"];
-            const suffixes = ["Byte", "Pixel", "Core", "Wave", "Pulse", "Node", "Shift", "Spark", "Blast", "Zone"];
-            return prefixes[Math.floor(Math.random() * prefixes.length)] + 
-                   suffixes[Math.floor(Math.random() * suffixes.length)];
+ function generateRandomName() {
+    const namePatterns = {
+        cyber: {
+            prefixes: [ "Chrono", "Pixel", "Core", "Wave", "Pulse", "Node", "Shift", "Spark", "Blast","Synth", "Zone", "Circuit", "Echo", "Cyber", "Neo", "Quantum", "Digital", "Plasma", "Neon", "Glitch", "Flux", "Binary", "Data"],
+            suffixes: ["Byte", "Chip", "Hack", "Net", "Code", "Bot", "Drone", "Grid", "Link", "Node",  "Tech", "Wave", "Core", "Pulse", "Flux", "Spark", "Shift", "Glitch", "Pixel" ]
+        },
+        monster: {
+            prefixes: ["Fang", "Claw", "Maw", "Terror", "Bane", "Reaver", "Stalker", "Hunter", "Shadow", "Dark", "Blood", "Fang", "Claw", "Void", "Doom", "Rage", "Beast", "Primal"],
+            suffixes: ["Howl", "Snarl", "Lord", "Fiend", "Bringer", "Stalker", "Hunter", "Wraith", "Terror", "Giant", "Crusher", "Howler"]
+        },
+        human: {
+            prefixes: ["Strike", "Fist", "Edge", "Born", "Heart", "Soul", "Eye", "Hand", "Walker", "Runner", "Blade", "Ghost", "Viper", "Raven", "Wolf", "Hawk", "Rogue"],
+            suffixes: ["Fury", "Strike", "Shadow", "Rider", "Hunter", "Warrior", "Guardian", "Seeker", "Nomad", "Storm", "Steel", "Iron", "Thunder", "Wraith"]
+        },
+        alien: {
+            prefixes: ["Xeno", "Zeta", "Kryo", "Vex", "Nex", "Quar", "Tari", "Luma", "Orin", "Vira", "Xylo", "Zyra", "Kora", "Mira", "Nova", "Prax", "Ryn", "Sora", "Talon", "Vara", "Xeno", "Cosmic", "Void", "Star", "Nova", "Quantum", "Phase", "Warp", "Nebula", "Astral"],
+            suffixes: ["ling", "oid", "ite", "ar", "on", "arion", "ax", "ex", "us", "ar", "Form", "Entity", "Being", "Essence", "Mind", "Consciousness", "Traveler", "Observer", "Seeker", "Keeper"]
         }
+    };
+    
+    const patterns = namePatterns[currentTraitSet];
+    return patterns.prefixes[Math.floor(Math.random() * patterns.prefixes.length)] + 
+           patterns.suffixes[Math.floor(Math.random() * patterns.suffixes.length)];
+}
 
         function generateRandomNames() {
             const count = parseInt(document.getElementById('entryCount').value) || 13;
