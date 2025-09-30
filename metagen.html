@@ -4,24 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FUAX Metadata Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.globe.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            background: #1a1a1a;
-            color: #00ff00;
+            background: #000;
+            color: #00ffff;
+        }
+        #vanta-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -10;
+            opacity: 0.3;
         }
         .container {
-            background: #2a2a2a;
+            background: rgba(0, 0, 0, 0.85);
             padding: 20px;
             border-radius: 10px;
-            border: 1px solid #00ff00;
+            border: 1px solid #cd5c28;
         }
         button {
-            background: #00ff00;
-            color: #000;
+            background: #cd5c28;
+            color: #00ffff;
             border: none;
             padding: 15px 30px;
             border-radius: 5px;
@@ -30,358 +38,203 @@
             margin: 10px 5px;
         }
         button:hover {
-            background: #00cc00;
+            background: #b34a20;
+        }
+        input, select {
+            background: rgba(0, 0, 0, 0.7);
+            color: #00ffff;
+            border: 1px solid #cd5c28;
+            padding: 8px;
+            border-radius: 4px;
         }
         textarea {
             width: 100%;
             height: 400px;
-            background: #1a1a1a;
-            color: #00ff00;
-            border: 1px solid #00ff00;
+            background: rgba(0, 0, 0, 0.9);
+            color: #00ffff;
+            border: 1px solid #cd5c28;
             padding: 10px;
             font-family: monospace;
         }
-        .output {
-            margin-top: 20px;
+        .trait-set {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            background: rgba(205, 92, 40, 0.3);
+            border: 2px solid #cd5c28;
+            border-radius: 8px;
+            cursor: pointer;
         }
-        h1 {
-            text-align: center;
-            color: #00ff00;
-            text-shadow: 0 0 10px #00ff00;
+        .trait-set.active {
+            background: #cd5c28;
+            color: #000;
         }
-        .instructions {
-            background: #333;
-            padding: 15px;
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
             margin: 20px 0;
-            border-left: 4px solid #00ff00;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00ffff;
         }
     </style>
 </head>
 <body>
+    <div id="vanta-bg"></div>
+    <script>
+        VANTA.GLOBE({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200,
+            minWidth: 200,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x00ffff,
+            backgroundColor: 0x000000
+        })
+    </script>
+
     <div class="container">
         <div style="text-align:center; margin-bottom:1.5em;">
-            <img src="branding/fuax-logo.png" alt="Forever Unfinished Artworx Logo" style="width:60px; height:auto; margin-bottom:0.3em;" onerror="this.style.display='none'">
-            <div style="font-size:1.6em; font-weight:bold; color:#0ea5e9; letter-spacing:2px;">Forever Unfinished Artworx <span style="font-size:1em; color:#6366f1; font-weight:bold; margin-left:6px;">(FUAX)</span></div>
-            <div style="font-size:1em; color:#4f46e5; margin-top:0.2em;">Metadata Generator</div>
-        </div>
-        
-        <h1 style="color:#04f5e5; text-shadow:0 0 10px #04f5e5;">FUAX Metadata Generator</h1>
-        
-        <div class="instructions">
-            <h3>Instructions:</h3>
-            <p>1. Click "Generate All Metadata" to create 100 unique FUAX NFTs</p>
-            <p>2. Copy the CSV output and save it as a .csv file</p>
-            <p>3. Import to OpenSea Studio or use for manual entry</p>
+            <img src="branding/fuax-logo.png" alt="FUAX Logo" style="width:60px; height:auto; margin-bottom:0.5em;" onerror="this.style.display='none'">
+            <div style="font-size:1.8em; font-weight:bold; color:#00ffff; letter-spacing:2px;">Forever Unfinished Artworx <span style="font-size:0.9em; color:#cd5c28;">(FUAX)</span></div>
+            <div style="font-size:1.1em; color:#00cccc; margin-top:0.3em;">Metadata Generator</div>
         </div>
 
-        <button onclick="generateMetadata()">🚀 Generate All Metadata</button>
-        <button onclick="generateSingleRandom()">🎲 Generate One Random</button>
-        <button onclick="showEditor()">✏️ Edit Metadata</button>
-        <button onclick="clearOutput()">🗑️ Clear Output</button>
+        <div class="controls">
+            <div>
+                <label>Number of Entries (1-25):</label>
+                <input type="number" id="entryCount" min="1" max="25" value="13">
+            </div>
+            <div>
+                <label>Custom Name Prefix (optional):</label>
+                <input type="text" id="namePrefix" placeholder="e.g. CyberPug">
+            </div>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <h3 style="color:#00ffff;">Select Trait Set:</h3>
+            <div class="trait-set active" onclick="selectTraitSet('cyber')">Cyber/Tech</div>
+            <div class="trait-set" onclick="selectTraitSet('monster')">Monster</div>
+            <div class="trait-set" onclick="selectTraitSet('human')">Human</div>
+            <div class="trait-set" onclick="selectTraitSet('alien')">Alien</div>
+        </div>
+
+        <button onclick="generateMetadata()">🚀 Generate Metadata</button>
+        <button onclick="generateRandomNames()">🎲 Generate Random Names</button>
+        <button onclick="clearOutput()">🗑️ Clear</button>
         <button onclick="downloadCSV()">📥 Download CSV</button>
-        
-        <div id="editor" style="display:none; margin-top:20px; background:#333; padding:20px; border-radius:10px;">
-            <h3>Edit Individual NFT:</h3>
-            <label>NFT Number (1-100): <input type="number" id="editId" min="1" max="100" value="1"></label><br><br>
-            <label>Name: <input type="text" id="editName" style="width:300px;"></label><br><br>
-            
-            <label>Personality:</label>
-            <select id="editPersonality">
-                <option>Sleeper</option>
-                <option>Hacker</option>
-                <option>Gamer</option>
-                <option>Artist</option>
-                <option>Rebel</option>
-                <option>Explorer</option>
-                <option>Guardian</option>
-                <option>Trickster</option>
-                <option>Scholar</option>
-                <option>Warrior</option>
-            </select><br><br>
-            
-            <label>Digital Affinity:</label>
-            <select id="editDigitalAffinity">
-                <option>Code Master</option>
-                <option>Data Analyst</option>
-                <option>Network Specialist</option>
-                <option>Security Expert</option>
-                <option>AI Whisperer</option>
-                <option>Crypto Enthusiast</option>
-                <option>System Admin</option>
-                <option>Blockchain Oracle</option>
-                <option>Quantum Processor</option>
-                <option>Reality Coder</option>
-            </select><br><br>
-            
-            <label>Energy Level:</label>
-            <select id="editEnergyLevel">
-                <option>Chill</option>
-                <option>Focused</option>
-                <option>Hyper</option>
-                <option>Zen</option>
-                <option>Chaotic</option>
-                <option>Explosive</option>
-                <option>Glitched</option>
-                <option>Overclocked</option>
-            </select><br><br>
-            
-            <label>Special Ability:</label>
-            <select id="editSpecialAbility">
-                <option>Memory Bank</option>
-                <option>Processing Power</option>
-                <option>Connection Speed</option>
-                <option>Firewall Strength</option>
-                <option>Battery Life</option>
-                <option>Encryption Key</option>
-                <option>Dream Hacking</option>
-                <option>Time Dilation</option>
-                <option>Reality Sync</option>
-                <option>Universe Access</option>
-            </select><br><br>
-            
-            <label>Origin Story:</label>
-            <select id="editOriginStory">
-                <option>Lab Creation</option>
-                <option>Street Upload</option>
-                <option>Corporate Escape</option>
-                <option>Indie Development</option>
-                <option>Open Source</option>
-                <option>Black Market</option>
-                <option>Government Project</option>
-                <option>Alien Download</option>
-                <option>Glitch Spawn</option>
-            </select><br><br>
-            
-            <button onclick="loadForEdit()">📋 Load Current Data</button>
-            <button onclick="saveEdit()">💾 Save Changes</button>
-            <button onclick="hideEditor()">❌ Close Editor</button>
-        </div>
 
-        <div class="output">
-            <h3>Output:</h3>
+        <div style="margin-top: 20px;">
+            <h3 style="color:#00ffff;">Output:</h3>
             <textarea id="output" placeholder="Generated metadata will appear here..."></textarea>
         </div>
-        <footer style="margin-top:2em; text-align:center; color:#6366f1; font-size:1em;">
-            <img src="branding/fuax-logo.png" alt="Forever Unfinished Artworx Logo" style="width:28px; height:auto; display:inline-block; vertical-align:middle; margin-right:6px;" onerror="this.style.display='none'">
-            <span style="font-weight:bold; color:#0ea5e9;">Forever Unfinished Artworx (FUAX)</span> &mdash; Metadata Generator &copy; 2025
-        </footer>
     </div>
 
     <script>
-        // Your 100 Cyber Pug names
-        const names = [
-            "ByteBark", "PixelPaws", "CodeCrush", "DataDog", "CryptoPup", "NetNinja", "BugFixer", "CloudChaser", "SyntaxSnort", "FirewallFido",
-            "NeonNose", "LaserLick", "PlasmaPooch", "CyberSnout", "TurboTail", "QuantumQuirk", "PhotonPug", "AtomicArf", "NitroNap", "VortexVibe",
-            "GlitchGrunt", "RogueRuff", "RebelByte", "AnarchyArf", "ChaosChip", "VirusVibe", "HackerHowl", "OutlawOmega", "PiratePaws", "MaverickMega",
-            "BossBark", "PowerPup", "LevelLord", "QuestQueen", "ArcadeArf", "RetroRuff", "ComboCanine", "UltimateUwU", "LegendLick", "EpicEars",
-            "SnuggleScript", "CuddleCode", "FluffyFirewall", "WiggleWiFi", "BoopBot", "SquishSQL", "PuffyPixel", "ChubbyChip", "RoundRAM", "BubbleByte",
-            "ZephyrZap", "NebulaNose", "EchoEngine", "RhythmRAM", "HarmonyHex", "MelodyMega", "BeatBinary", "PulsePup", "VibeVector", "FreqFido",
-            "CrimsonCode", "VioletVirus", "AzureAlgo", "GoldenGig", "SilverSync", "PlatinumPaws", "RubyRun", "EmeraldExe", "SapphireScript", "DiamondData",
-            "VoltVibe", "ThunderThumb", "LightningLick", "SparkSniffer", "BoltBark", "ChargeChew", "CurrentCrush", "WattWag", "AmpArf", "SurgeSit",
-            "StarshipSnort", "GalaxyGrunt", "CosmosCrush", "OrbitOmega", "PlanetPaws", "MeteorMunch", "AsteroidArf", "CometCrush", "NovaNose", "SupernovaSit",
-            "AlphaArch", "BetaBark", "GammaGrowl", "DeltaDog", "EpsilonEars", "ZetaZoom", "EtaEngine", "ThetaThumb", "IotaIdle", "KappaKeen"
-        ];
-
-        // Trait definitions with rarity weights - PERSONALITY BASED
-        const traits = {
-            personality: [
-                {name: "Sleeper", weight: 15},
-                {name: "Hacker", weight: 15},
-                {name: "Gamer", weight: 15},
-                {name: "Artist", weight: 12},
-                {name: "Rebel", weight: 10},
-                {name: "Explorer", weight: 10},
-                {name: "Guardian", weight: 8},
-                {name: "Trickster", weight: 6},
-                {name: "Scholar", weight: 5},
-                {name: "Warrior", weight: 4}
-            ],
-            digitalAffinity: [
-                {name: "Code Master", weight: 20},
-                {name: "Data Analyst", weight: 18},
-                {name: "Network Specialist", weight: 15},
-                {name: "Security Expert", weight: 12},
-                {name: "AI Whisperer", weight: 10},
-                {name: "Crypto Enthusiast", weight: 8},
-                {name: "System Admin", weight: 7},
-                {name: "Blockchain Oracle", weight: 5},
-                {name: "Quantum Processor", weight: 3},
-                {name: "Reality Coder", weight: 2}
-            ],
-            energyLevel: [
-                {name: "Chill", weight: 25},
-                {name: "Focused", weight: 20},
-                {name: "Hyper", weight: 18},
-                {name: "Zen", weight: 15},
-                {name: "Chaotic", weight: 12},
-                {name: "Explosive", weight: 6},
-                {name: "Glitched", weight: 3},
-                {name: "Overclocked", weight: 1}
-            ],
-            specialAbility: [
-                {name: "Memory Bank", weight: 20},
-                {name: "Processing Power", weight: 18},
-                {name: "Connection Speed", weight: 16},
-                {name: "Firewall Strength", weight: 14},
-                {name: "Battery Life", weight: 10},
-                {name: "Encryption Key", weight: 8},
-                {name: "Dream Hacking", weight: 6},
-                {name: "Time Dilation", weight: 4},
-                {name: "Reality Sync", weight: 3},
-                {name: "Universe Access", weight: 1}
-            ],
-            originStory: [
-                {name: "Lab Creation", weight: 22},
-                {name: "Street Upload", weight: 20},
-                {name: "Corporate Escape", weight: 18},
-                {name: "Indie Development", weight: 15},
-                {name: "Open Source", weight: 10},
-                {name: "Black Market", weight: 8},
-                {name: "Government Project", weight: 4},
-                {name: "Alien Download", weight: 2},
-                {name: "Glitch Spawn", weight: 1}
-            ]
-        };
-
-        // Weighted random selection function
-        function weightedRandom(items) {
-            const totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
-            const random = Math.random() * totalWeight;
-            let currentWeight = 0;
-            
-            for (let item of items) {
-                currentWeight += item.weight;
-                if (random <= currentWeight) {
-                    return item.name;
-                }
-            }
-            return items[0].name; // fallback
-        }
-
-        // Generate single metadata object
-        function generateSingle(index) {
-            return {
-                id: index,
-                name: `${names[index - 1]} #${index.toString().padStart(3, '0')}`,
-                description: "A unique Cyber Pug from the digital realm",
-                personality: weightedRandom(traits.personality),
-                digitalAffinity: weightedRandom(traits.digitalAffinity),
-                energyLevel: weightedRandom(traits.energyLevel),
-                specialAbility: weightedRandom(traits.specialAbility),
-                originStory: weightedRandom(traits.originStory)
-            };
-        }
-
-        // Store generated metadata globally for editing
+        let currentTraitSet = 'cyber';
         let generatedData = [];
 
-        // Generate all 100 metadata entries
+        const traitSets = {
+            cyber: {
+                personality: ["Hacker", "Gamer", "Coder", "Rebel", "Explorer", "Guardian"],
+                affinity: ["Code Master", "Data Analyst", "Network Specialist", "AI Whisperer", "Crypto Expert"],
+                energy: ["Focused", "Hyper", "Chill", "Chaotic", "Zen"],
+                ability: ["Processing Power", "Connection Speed", "Firewall Strength", "Encryption Key"],
+                origin: ["Lab Creation", "Street Upload", "Corporate Escape", "Open Source"]
+            },
+            monster: {
+                personality: ["Fierce", "Cunning", "Wild", "Ancient", "Chaotic", "Primal"],
+                affinity: ["Shadow Walker", "Night Hunter", "Beast Master", "Void Dweller"],
+                energy: ["Aggressive", "Dormant", "Explosive", "Unstable"],
+                ability: ["Regeneration", "Stealth", "Strength", "Terror Inducing"],
+                origin: ["Summoned", "Mutated", "Ancient Awakening", "Dark Ritual"]
+            },
+            human: {
+                personality: ["Leader", "Strategist", "Warrior", "Scholar", "Healer", "Rogue"],
+                affinity: ["Combat Expert", "Tactician", "Diplomat", "Engineer"],
+                energy: ["Determined", "Calm", "Intense", "Adaptive"],
+                ability: ["Leadership", "Survival Instinct", "Innovation", "Persuasion"],
+                origin: ["Urban", "Military", "Academic", "Underground"]
+            },
+            alien: {
+                personality: ["Observer", "Collector", "Emissary", "Traveler", "Ancient"],
+                affinity: ["Telepathic", "Quantum Mind", "Hive Linked", "Cosmic Aware"],
+                energy: ["Ethereal", "Pulsing", "Transdimensional", "Crystalline"],
+                ability: ["Telekinesis", "Phase Shift", "Mind Link", "Reality Bend"],
+                origin: ["Distant Star", "Wormhole", "Dimensional Rift", "Ancient Colony"]
+            }
+        };
+
+        function selectTraitSet(set) {
+            currentTraitSet = set;
+            document.querySelectorAll('.trait-set').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function generateRandomName() {
+            const prefixes = ["Cyber", "Neo", "Quantum", "Void", "Stellar", "Digital", "Plasma", "Neon", "Glitch", "Flux"];
+            const suffixes = ["Byte", "Pixel", "Core", "Wave", "Pulse", "Node", "Shift", "Spark", "Blast", "Zone"];
+            return prefixes[Math.floor(Math.random() * prefixes.length)] + 
+                   suffixes[Math.floor(Math.random() * suffixes.length)];
+        }
+
+        function generateRandomNames() {
+            const count = parseInt(document.getElementById('entryCount').value) || 13;
+            let names = '';
+            for (let i = 0; i < count; i++) {
+                names += generateRandomName() + (i < count - 1 ? ', ' : '');
+            }
+            alert(`Random names generated:\n\n${names}\n\nCopy these to use as custom names!`);
+        }
+
+        function randomPick(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
         function generateMetadata() {
-            generatedData = []; // Reset
+            const count = parseInt(document.getElementById('entryCount').value) || 13;
+            const namePrefix = document.getElementById('namePrefix').value || "Entity";
+            const traits = traitSets[currentTraitSet];
             
-            for (let i = 1; i <= 100; i++) {
-                generatedData.push(generateSingle(i));
+            generatedData = [];
+            
+            for (let i = 1; i <= count; i++) {
+                generatedData.push({
+                    id: i,
+                    name: `${namePrefix} #${i.toString().padStart(3, '0')}`,
+                    description: `A unique ${currentTraitSet} entity from the digital realm`,
+                    personality: randomPick(traits.personality),
+                    affinity: randomPick(traits.affinity),
+                    energy: randomPick(traits.energy),
+                    ability: randomPick(traits.ability),
+                    origin: randomPick(traits.origin)
+                });
             }
             
             updateOutput();
         }
 
-        // Update the CSV output display
         function updateOutput() {
-            let csv = "ID,Name,Description,Personality,Digital Affinity,Energy Level,Special Ability,Origin Story\n";
+            let csv = "ID,Name,Description,Personality,Affinity,Energy,Ability,Origin\n";
             
             generatedData.forEach(item => {
-                csv += `${item.id},"${item.name}","${item.description}","${item.personality}","${item.digitalAffinity}","${item.energyLevel}","${item.specialAbility}","${item.originStory}"\n`;
+                csv += `${item.id},"${item.name}","${item.description}","${item.personality}","${item.affinity}","${item.energy}","${item.ability}","${item.origin}"\n`;
             });
             
             document.getElementById('output').value = csv;
         }
 
-        // Show/hide editor
-        function showEditor() {
-            if (generatedData.length === 0) {
-                alert('Generate metadata first!');
-                return;
-            }
-            document.getElementById('editor').style.display = 'block';
-        }
-        
-        function hideEditor() {
-            document.getElementById('editor').style.display = 'none';
-        }
-
-        // Load data for editing
-        function loadForEdit() {
-            const id = parseInt(document.getElementById('editId').value);
-            if (id < 1 || id > 100 || !generatedData[id-1]) {
-                alert('Invalid NFT number or no data generated!');
-                return;
-            }
-            
-            const item = generatedData[id-1];
-            document.getElementById('editName').value = item.name;
-            document.getElementById('editPersonality').value = item.personality;
-            document.getElementById('editDigitalAffinity').value = item.digitalAffinity;
-            document.getElementById('editEnergyLevel').value = item.energyLevel;
-            document.getElementById('editSpecialAbility').value = item.specialAbility;
-            document.getElementById('editOriginStory').value = item.originStory;
-        }
-
-        // Save edited data
-        function saveEdit() {
-            const id = parseInt(document.getElementById('editId').value);
-            if (id < 1 || id > 100 || !generatedData[id-1]) {
-                alert('Invalid NFT number!');
-                return;
-            }
-            
-            // Update the data
-            generatedData[id-1] = {
-                id: id,
-                name: document.getElementById('editName').value,
-                description: "A unique Cyber Pug from the digital realm",
-                personality: document.getElementById('editPersonality').value,
-                digitalAffinity: document.getElementById('editDigitalAffinity').value,
-                energyLevel: document.getElementById('editEnergyLevel').value,
-                specialAbility: document.getElementById('editSpecialAbility').value,
-                originStory: document.getElementById('editOriginStory').value
-            };
-            
-            // Refresh the output
-            updateOutput();
-            alert(`NFT #${id} updated!`);
-        }
-
-        // Generate one random for testing
-        function generateSingleRandom() {
-            const randomIndex = Math.floor(Math.random() * 100) + 1;
-            const metadata = generateSingle(randomIndex);
-            
-            const output = `
-ID: ${metadata.id}
-Name: ${metadata.name}
-Description: ${metadata.description}
-Personality: ${metadata.personality}
-Digital Affinity: ${metadata.digitalAffinity}
-Energy Level: ${metadata.energyLevel}
-Special Ability: ${metadata.specialAbility}
-Origin Story: ${metadata.originStory}
-
----
-
-CSV Format:
-${metadata.id},"${metadata.name}","${metadata.description}","${metadata.personality}","${metadata.digitalAffinity}","${metadata.energyLevel}","${metadata.specialAbility}","${metadata.originStory}"
-            `;
-            
-            document.getElementById('output').value = output;
-        }
-
-        // Clear output
         function clearOutput() {
             document.getElementById('output').value = '';
+            generatedData = [];
         }
 
-        // Download as CSV file
         function downloadCSV() {
             const content = document.getElementById('output').value;
             if (!content) {
@@ -393,7 +246,7 @@ ${metadata.id},"${metadata.name}","${metadata.description}","${metadata.personal
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'cyber_pugs_metadata.csv';
+            a.download = `fuax_metadata_${currentTraitSet}_${Date.now()}.csv`;
             a.click();
             window.URL.revokeObjectURL(url);
         }
