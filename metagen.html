@@ -127,12 +127,18 @@
 
         <button onclick="generateMetadata()">🚀 Generate Metadata</button>
         <button onclick="generateRandomNames()">🎲 Generate Random Names</button>
+        <button onclick="toggleTableView()">📊 Toggle Table View</button>
         <button onclick="clearOutput()">🗑️ Clear</button>
         <button onclick="downloadCSV()">📥 Download CSV</button>
 
         <div style="margin-top: 20px;">
             <h3 style="color:#00ffff;">Output:</h3>
             <textarea id="output" placeholder="Generated metadata will appear here..."></textarea>
+        </div>
+        <div id="tableView" style="display:none; margin-top:20px; overflow-x:auto;">
+             <h3 style="color:#00ffff;">Table View:</h3>
+             <table id="metadataTable" style="width:100%; border-collapse:collapse; background:rgba(0,0,0,0.7);">
+              </table>
         </div>
     </div>
 
@@ -203,7 +209,7 @@
 }
 
         function generateRandomNames() {
-            const count = parseInt(document.getElementById('entryCount').value) || 13;
+            const count = parseInt(document.getElementById('entryCount').value) || 9;
             let names = '';
             for (let i = 0; i < count; i++) {
                 names += generateRandomName() + (i < count - 1 ? ', ' : '');
@@ -211,13 +217,18 @@
             alert(`Random names generated:\n\n${names}\n\nCopy these to use as custom names!`);
         }
 
+        function toggleTableView() {
+            const table = document.getElementById('tableView');
+            table.style.display = table.style.display === 'none' ? 'block' : 'none';
+    }
+
         function randomPick(arr) {
             return arr[Math.floor(Math.random() * arr.length)];
         }
 
         function generateMetadata() {
-            const count = parseInt(document.getElementById('entryCount').value) || 13;
-            const namePrefix = document.getElementById('namePrefix').value || "Entity";
+            const count = parseInt(document.getElementById('entryCount').value) || 9;
+            const namePrefix = document.getElementById('namePrefix').value || "NFT";
             const traits = traitSets[currentTraitSet];
             
             generatedData = [];
@@ -238,36 +249,67 @@
             updateOutput();
         }
 
-        function updateOutput() {
-            let csv = "ID,Name,Description,Personality,Affinity,Energy,Ability,Origin\n";
-            
-            generatedData.forEach(item => {
-                csv += `${item.id},"${item.name}","${item.description}","${item.personality}","${item.affinity}","${item.energy}","${item.ability}","${item.origin}"\n`;
-            });
-            
-            document.getElementById('output').value = csv;
-        }
-
-        function clearOutput() {
-            document.getElementById('output').value = '';
-            generatedData = [];
-        }
-
-        function downloadCSV() {
-            const content = document.getElementById('output').value;
-            if (!content) {
-                alert('Generate metadata first!');
-                return;
-            }
-            
-            const blob = new Blob([content], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `fuax_metadata_${currentTraitSet}_${Date.now()}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-        }
+       function updateOutput() {
+    // Calculate rarity scores
+    const rarityScores = generatedData.map(item => {
+        let score = 0;
+        const traits = traitSets[currentTraitSet];
+        
+        // Simple rarity: fewer occurrences = higher rarity
+        Object.keys(traits).forEach(category => {
+            const allValues = generatedData.map(d => d[category]);
+            const occurrences = allValues.filter(v => v === item[category]).length;
+            score += (generatedData.length - occurrences) * 10;
+        });
+        
+        return score;
+    });
+    
+    // Add rarity to data
+    generatedData.forEach((item, i) => {
+        item.rarityScore = rarityScores[i];
+    });
+    
+    // Generate CSV
+    let csv = "ID,Name,Description,Personality,Affinity,Energy,Ability,Origin,Rarity Score\n";
+    generatedData.forEach(item => {
+        csv += `${item.id},"${item.name}","${item.description}","${item.personality}","${item.affinity}","${item.energy}","${item.ability}","${item.origin}",${item.rarityScore}\n`;
+    });
+    document.getElementById('output').value = csv;
+    
+    // Generate table view
+    const table = document.getElementById('metadataTable');
+    table.innerHTML = `
+        <thead>
+            <tr style="background:#cd5c28; color:#000;">
+                <th style="padding:10px; border:1px solid #cd5c28;">ID</th>
+                <th style="padding:10px; border:1px solid #cd5c28;">Name</th>
+                <th style="padding:10px; border:1px solid #cd5c28;">Personality</th>
+                <th style="padding:10px; border:1px solid #cd5c28;">Affinity</th>
+                <th style="padding:10px; border:1px solid #cd5c28;">Energy</th>
+                <th style="padding:10px; border:1px solid #cd5c28;">Ability</th>
+                <th style="padding:10px; border:1px solid #cd5c28;">Origin</th>
+                <th style="padding:10px; border:1px solid #cd5c28;">Rarity</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${generatedData.map(item => `
+                <tr style="color:#00ffff;">
+                    <td style="padding:8px; border:1px solid #cd5c28;">${item.id}</td>
+                    <td style="padding:8px; border:1px solid #cd5c28;">${item.name}</td>
+                    <td style="padding:8px; border:1px solid #cd5c28;">${item.personality}</td>
+                    <td style="padding:8px; border:1px solid #cd5c28;">${item.affinity}</td>
+                    <td style="padding:8px; border:1px solid #cd5c28;">${item.energy}</td>
+                    <td style="padding:8px; border:1px solid #cd5c28;">${item.ability}</td>
+                    <td style="padding:8px; border:1px solid #cd5c28;">${item.origin}</td>
+                    <td style="padding:8px; border:1px solid #cd5c28; font-weight:bold;">${item.rarityScore}</td>
+                </tr>
+            `).join('')}
+        </tbody>
+    `;
+    
+    document.getElementById('tableView').style.display = 'block';
+}
     </script>
 </body>
 </html>
