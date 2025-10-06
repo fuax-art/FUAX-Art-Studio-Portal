@@ -1,384 +1,402 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FUAX Metadata Generator</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.globe.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #000;
-            color: #00ffff;
-        }
-        #vanta-bg {
-            position: fixed;
-            inset: 0;
-            z-index: -10;
-            opacity: 0.3;
-        }
-        .container {
-            background: rgba(0, 0, 0, 0.85);
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #cd5c28;
-        }
-        button {
-            background: #cd5c28;
-            color: #00ffff;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 10px 5px;
-        }
-        button:hover {
-            background: #b34a20;
-        }
-        input, select {
-            background: rgba(0, 0, 0, 0.7);
-            color: #00ffff;
-            border: 1px solid #cd5c28;
-            padding: 8px;
-            border-radius: 4px;
-        }
-        textarea {
-            width: 100%;
-            height: 400px;
-            background: rgba(0, 0, 0, 0.9);
-            color: #00ffff;
-            border: 1px solid #cd5c28;
-            padding: 10px;
-            font-family: monospace;
-        }
-        .trait-set {
-            display: inline-block;
-            margin: 10px;
-            padding: 10px 20px;
-            background: rgba(205, 92, 40, 0.3);
-            border: 2px solid #cd5c28;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .trait-set.active {
-            background: #cd5c28;
-            color: #000;
-        }
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin: 20px 0;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #00ffff;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FUAX Metadata Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.globe.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #000;
+            color: #00ffff;
+        }
+        #vanta-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -10;
+            opacity: 0.3;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #cd5c28;
+        }
+        button {
+            background: #cd5c28;
+            color: #00ffff;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #b34a20;
+        }
+        input, select {
+            background: rgba(0, 0, 0, 0.7);
+            color: #00ffff;
+            border: 1px solid #cd5c28;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        textarea {
+            width: 100%;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.9);
+            color: #00ffff;
+            border: 1px solid #cd5c28;
+            padding: 10px;
+            font-family: monospace;
+        }
+        .trait-set {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            background: rgba(205, 92, 40, 0.3);
+            border: 2px solid #cd5c28;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .trait-set.active {
+            background: #cd5c28;
+            color: #000;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00ffff;
+        }
+    </style>
 </head>
 <body>
-    <div id="vanta-bg"></div>
-    <script>
-        VANTA.GLOBE({
-            el: "#vanta-bg",
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            minHeight: 200,
-            minWidth: 200,
-            scale: 1.00,
-            scaleMobile: 1.00,
-            color: 0x00ffff,
-            backgroundColor: 0x000000
-        })
-    </script>
+    <div id="vanta-bg"></div>
+    <script>
+        VANTA.GLOBE({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200,
+            minWidth: 200,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x00ffff,
+            backgroundColor: 0x000000
+        })
+    </script>
 
-    <div class="container">
-        <div style="text-align:center; margin-bottom:1.5em;">
-            <div style="font-size:1.8em; font-weight:bold; color:#00ffff; letter-spacing:2px;">Forever Unfinished Artworx <span style="font-size:0.9em; color:#cd5c28;">(FUAX)</span></div>
-            <div style="font-size:1.1em; color:#00cccc; margin-top:0.3em;">Metadata Generator</div>
-        </div>
+    <div class="container">
+        <div style="text-align:center; margin-bottom:1.5em;">
+            <div style="font-size:1.8em; font-weight:bold; color:#00ffff; letter-spacing:2px;">Forever Unfinished Artworx <span style="font-size:0.9em; color:#cd5c28;">(FUAX)</span></div>
+            <div style="font-size:1.1em; color:#00cccc; margin-top:0.3em;">Metadata Generator</div>
+        </div>
 
-        <div class="controls">
-            <div>
-                <label>Number of Entries (1-25):</label>
-                <input type="number" id="entryCount" min="1" max="25" value="13">
-            </div>
-            <div>
-                <label>Custom Name Prefix (optional):</label>
-                <input type="text" id="namePrefix" placeholder="e.g. CyberPug">
-            </div>
-        </div>
+        <div class="controls">
+            <div>
+                <label>Number of Entries (1-100):</label>
+                <input type="number" id="entryCount" min="1" max="100" value="13">
+            </div>
+            <div>
+                <label>Custom Name Prefix (optional):</label>
+                <input type="text" id="namePrefix" placeholder="e.g. CyberPug">
+            </div>
+        </div>
 
-        <div style="margin: 20px 0;">
-            <h3 style="color:#00ffff;">Select Trait Set:</h3>
-            <div class="trait-set active" onclick="selectTraitSet('cyber', this)">Cyber/Tech</div>
-            <div class="trait-set" onclick="selectTraitSet('monster', this)">Monster</div>
-            <div class="trait-set" onclick="selectTraitSet('human', this)">Human</div>
-            <div class="trait-set" onclick="selectTraitSet('alien', this)">Alien</div>
-        </div>
+        <div style="margin: 20px 0;">
+            <h3 style="color:#00ffff;">Select Trait Set:</h3>
+            <div class="trait-set active" onclick="selectTraitSet('cyber', this)">Cyber/Tech</div>
+            <div class="trait-set" onclick="selectTraitSet('monster', this)">Monster</div>
+            <div class="trait-set" onclick="selectTraitSet('human', this)">Human</div>
+            <div class="trait-set" onclick="selectTraitSet('alien', this)">Alien</div>
+        </div>
 
-        <button onclick="generateMetadata()">🚀 Generate Metadata</button>
-        <button onclick="generateRandomNames()">🎲 Generate Random Names</button>
-        <button onclick="toggleTableView()">📊 Toggle Table View</button>
-        <button onclick="clearOutput()">🗑️ Clear</button>
-        <button onclick="downloadCSV()">📥 Download CSV</button>
+        <button onclick="generateMetadata()">🚀 Generate Metadata</button>
+        <button onclick="generateRandomNames()">🎲 Generate Random Names</button>
+        <button onclick="toggleTableView()">📊 Toggle Table View</button>
+        <button onclick="clearOutput()">🗑️ Clear</button>
+        <button onclick="downloadCSV()">📥 Download CSV</button>
 
-        <div style="margin-top: 20px;">
-            <h3 style="color:#00ffff;">Output:</h3>
-            <textarea id="output" placeholder="Generated metadata will appear here..."></textarea>
-        </div>
-        <div id="tableView" style="display:none; margin-top:20px; overflow-x:auto;">
-             <h3 style="color:#00ffff;">Table View:</h3>
-             <table id="metadataTable" style="width:100%; border-collapse:collapse; background:rgba(0,0,0,0.7);">
-              </table>
-        </div>
-    </div>
+        <div style="margin-top: 20px;">
+            <h3 style="color:#00ffff;">Output:</h3>
+            <textarea id="output" placeholder="Generated metadata will appear here..."></textarea>
+        </div>
+        <div id="tableView" style="display:none; margin-top:20px; overflow-x:auto;">
+             <h3 style="color:#00ffff;">Table View:</h3>
+             <table id="metadataTable" style="width:100%; border-collapse:collapse; background:rgba(0,0,0,0.7);">
+              </table>
+        </div>
+    </div>
 
-    <script>
-        let currentTraitSet = 'cyber';
-        let generatedData = [];
+    <script>
+        let currentTraitSet = 'cyber';
+        let generatedData = [];
 
-        const traitSets = {
-            cyber: {
-                personality: ["Hacker", "Gamer", "Coder", "Rebel", "Explorer", "Guardian"],
-                affinity: ["Code Master", "Data Analyst", "Network Specialist", "AI Whisperer", "Crypto Expert"],
-                energy: ["Focused", "Hyper", "Chill", "Chaotic", "Zen"],
-                ability: ["Processing Power", "Connection Speed", "Firewall Strength", "Encryption Key"],
-                origin: ["Lab Creation", "Street Upload", "Corporate Escape", "Open Source"]
-            },
-            monster: {
-                personality: ["Fierce", "Cunning", "Wild", "Ancient", "Chaotic", "Primal"],
-                affinity: ["Shadow Walker", "Night Hunter", "Beast Master", "Void Dweller"],
-                energy: ["Aggressive", "Dormant", "Explosive", "Unstable"],
-                ability: ["Regeneration", "Stealth", "Strength", "Terror Inducing"],
-                origin: ["Summoned", "Mutated", "Ancient Awakening", "Dark Ritual"]
-            },
-            human: {
-                personality: ["Leader", "Strategist", "Warrior", "Scholar", "Healer", "Rogue"],
-                affinity: ["Combat Expert", "Tactician", "Diplomat", "Engineer"],
-                energy: ["Determined", "Calm", "Intense", "Adaptive"],
-                ability: ["Leadership", "Survival Instinct", "Innovation", "Persuasion"],
-                origin: ["Urban", "Military", "Academic", "Underground"]
-            },
-            alien: {
-                personality: ["Observer", "Collector", "Emissary", "Traveler", "Ancient"],
-                affinity: ["Telepathic", "Quantum Mind", "Hive Linked", "Cosmic Aware"],
-                energy: ["Ethereal", "Pulsing", "Transdimensional", "Crystalline"],
-                ability: ["Telekinesis", "Phase Shift", "Mind Link", "Reality Bend"],
-                origin: ["Distant Star", "Wormhole", "Dimensional Rift", "Ancient Colony"]
-            }
-        };
+        const traitSets = {
+            cyber: {
+                personality: { "Hacker": 20, "Gamer": 20, "Coder": 20, "Rebel": 10, "Explorer": 10, "Guardian": 5, "Nomad": 5, "Oracle": 5, "Cipher": 5 },
+                affinity: { "Code Master": 20, "Data Analyst": 20, "Network Specialist": 20, "AI Whisperer": 15, "Crypto Expert": 15, "Archivist": 5, "Synthesist": 5 },
+                energy: { "Focused": 25, "Hyper": 25, "Chill": 20, "Chaotic": 15, "Zen": 10, "Static": 5 },
+                ability: { "Processing Power": 25, "Connection Speed": 25, "Firewall Strength": 20, "Encryption Key": 20, "Data Surge": 5, "Mind Weave": 5 },
+                origin: { "Lab Creation": 25, "Street Upload": 25, "Corporate Escape": 20, "Open Source": 15, "Lost Code": 10, "Void-born": 5 },
+                utility: { "None": 90, "High-Res Access": 5, "Future Airdrop": 4, "Genesis": 1 }
+            },
+            monster: {
+                personality: { "Fierce": 20, "Cunning": 20, "Wild": 15, "Ancient": 15, "Chaotic": 10, "Primal": 10, "Unpredictable": 5, "Ghostly": 5},
+                affinity: { "Shadow Walker": 25, "Night Hunter": 25, "Beast Master": 20, "Void Dweller": 15, "Soul Eater": 10, "Elemental": 5},
+                energy: { "Aggressive": 30, "Dormant": 25, "Explosive": 20, "Unstable": 15, "Corrupting": 10},
+                ability: { "Regeneration": 30, "Stealth": 25, "Strength": 20, "Terror Inducing": 15, "Teleportation": 10},
+                origin: { "Summoned": 25, "Mutated": 25, "Ancient Awakening": 20, "Dark Ritual": 15, "Chaotic Breach": 10, "Abyssal Plain": 5},
+                utility: { "None": 90, "High-Res Access": 5, "Future Airdrop": 4, "Genesis": 1 }
+            },
+            human: {
+                personality: { "Leader": 20, "Strategist": 20, "Warrior": 20, "Scholar": 15, "Healer": 10, "Rogue": 10, "Innovator": 5},
+                affinity: { "Combat Expert": 25, "Tactician": 25, "Diplomat": 20, "Engineer": 15, "Pilot": 10, "Survivalist": 5},
+                energy: { "Determined": 30, "Calm": 25, "Intense": 20, "Adaptive": 15, "Resilient": 10},
+                ability: { "Leadership": 25, "Survival Instinct": 25, "Innovation": 20, "Persuasion": 15, "Psionic": 10, "Precognition": 5},
+                origin: { "Urban": 25, "Military": 25, "Academic": 20, "Underground": 15, "Hidden City": 10, "Outpost": 5},
+                utility: { "None": 90, "High-Res Access": 5, "Future Airdrop": 4, "Genesis": 1 }
+            },
+            alien: {
+                personality: { "Observer": 25, "Collector": 20, "Emissary": 20, "Traveler": 15, "Ancient": 10, "Architect": 5, "Watcher": 5},
+                affinity: { "Telepathic": 25, "Quantum Mind": 20, "Hive Linked": 20, "Cosmic Aware": 15, "Time Bending": 10, "Dimension Walker": 5},
+                energy: { "Ethereal": 25, "Pulsing": 25, "Transdimensional": 20, "Crystalline": 15, "Singularity": 10, "Cosmic Ray": 5},
+                ability: { "Telekinesis": 25, "Phase Shift": 25, "Mind Link": 20, "Reality Bend": 15, "Matter Manipulation": 10, "Soul Absorb": 5},
+                origin: { "Distant Star": 25, "Wormhole": 25, "Dimensional Rift": 20, "Ancient Colony": 15, "Galactic Core": 10, "Void of Creation": 5},
+                utility: { "None": 90, "High-Res Access": 5, "Future Airdrop": 4, "Genesis": 1 }
+            }
+        };
 
-        function selectTraitSet(set, element) {
-            currentTraitSet = set;
-            document.querySelectorAll('.trait-set').forEach(el => el.classList.remove('active'));
-            element.classList.add('active');
-        }
+        function selectTraitSet(set, element) {
+            currentTraitSet = set;
+            document.querySelectorAll('.trait-set').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+        }
 
-        function generateRandomName() {
-            const namePatterns = {
-                cyber: {
-                    prefixes: ["Chrono", "Pixel", "Core", "Wave", "Pulse", "Node", "Shift", "Spark", "Blast","Synth", "Zone", "Circuit", "Echo", "Cyber", "Neo", "Quantum", "Digital", "Plasma", "Neon", "Glitch", "Flux", "Binary", "Data"],
-                    suffixes: ["Byte", "Chip", "Hack", "Net", "Code", "Bot", "Drone", "Grid", "Link", "Node",  "Tech", "Wave", "Core", "Pulse", "Flux", "Spark", "Shift", "Glitch", "Pixel"]
-                },
-                monster: {
-                    prefixes: ["Fang", "Claw", "Maw", "Terror", "Bane", "Reaver", "Stalker", "Hunter", "Shadow", "Dark", "Blood", "Fang", "Claw", "Void", "Doom", "Rage", "Beast", "Primal"],
-                    suffixes: ["Howl", "Snarl", "Lord", "Fiend", "Bringer", "Stalker", "Hunter", "Wraith", "Terror", "Giant", "Crusher", "Howler"]
-                },
-                human: {
-                    prefixes: ["Strike", "Fist", "Edge", "Born", "Heart", "Soul", "Eye", "Hand", "Walker", "Runner", "Blade", "Ghost", "Viper", "Raven", "Wolf", "Hawk", "Rogue"],
-                    suffixes: ["Fury", "Strike", "Shadow", "Rider", "Hunter", "Warrior", "Guardian", "Seeker", "Nomad", "Storm", "Steel", "Iron", "Thunder"]
-                },
-                alien: {
-                    prefixes: ["Xeno", "Zeta", "Kryo", "Vex", "Nex", "Quar", "Tari", "Luma", "Orin", "Vira", "Xylo", "Zyra", "Kora", "Mira", "Nova", "Prax", "Ryn", "Sora", "Talon", "Vara", "Xeno", "Cosmic", "Void", "Star", "Nova", "Quantum", "Phase", "Warp", "Nebula", "Astral"],
-                    suffixes: ["ling", "oid", "ite", "ar", "on", "arion", "ax", "ex", "us", "ar", "Form", "Entity", "Being", "Essence", "Mind", "Consciousness", "Traveler", "Observer", "Seeker", "Keeper"]
-                }
-            };
-            
-            const patterns = namePatterns[currentTraitSet];
-            return patterns.prefixes[Math.floor(Math.random() * patterns.prefixes.length)] + 
-                   patterns.suffixes[Math.floor(Math.random() * patterns.suffixes.length)];
-        }
+        function generateRandomName() {
+            const namePatterns = {
+                cyber: {
+                    prefixes: ["Chrono", "Pixel", "Core", "Wave", "Pulse", "Node", "Shift", "Spark", "Blast","Synth", "Zone", "Circuit", "Echo", "Cyber", "Neo", "Quantum", "Digital", "Plasma", "Neon", "Glitch", "Flux", "Binary", "Data"],
+                    suffixes: ["Byte", "Chip", "Hack", "Net", "Code", "Bot", "Drone", "Grid", "Link", "Node",  "Tech", "Wave", "Core", "Pulse", "Flux", "Spark", "Shift", "Glitch", "Pixel"]
+                },
+                monster: {
+                    prefixes: ["Fang", "Claw", "Maw", "Terror", "Bane", "Reaver", "Stalker", "Hunter", "Shadow", "Dark", "Blood", "Fang", "Claw", "Void", "Doom", "Rage", "Beast", "Primal"],
+                    suffixes: ["Howl", "Snarl", "Lord", "Fiend", "Bringer", "Stalker", "Hunter", "Wraith", "Terror", "Giant", "Crusher", "Howler"]
+                },
+                human: {
+                    prefixes: ["Strike", "Fist", "Edge", "Born", "Heart", "Soul", "Eye", "Hand", "Walker", "Runner", "Blade", "Ghost", "Viper", "Raven", "Wolf", "Hawk", "Rogue"],
+                    suffixes: ["Fury", "Strike", "Shadow", "Rider", "Hunter", "Warrior", "Guardian", "Seeker", "Nomad", "Storm", "Steel", "Iron", "Thunder"]
+                },
+                alien: {
+                    prefixes: ["Xeno", "Zeta", "Kryo", "Vex", "Nex", "Quar", "Tari", "Luma", "Orin", "Vira", "Xylo", "Zyra", "Kora", "Mira", "Nova", "Prax", "Ryn", "Sora", "Talon", "Vara", "Xeno", "Cosmic", "Void", "Star", "Nova", "Quantum", "Phase", "Warp", "Nebula", "Astral"],
+                    suffixes: ["ling", "oid", "ite", "ar", "on", "arion", "ax", "ex", "us", "ar", "Form", "Entity", "Being", "Essence", "Mind", "Consciousness", "Traveler", "Observer", "Seeker", "Keeper"]
+                }
+            };
+             
+            const patterns = namePatterns[currentTraitSet];
+            return patterns.prefixes[Math.floor(Math.random() * patterns.prefixes.length)] + 
+                   patterns.suffixes[Math.floor(Math.random() * patterns.suffixes.length)];
+        }
 
-        function generateRandomNames() {
-            const count = parseInt(document.getElementById('entryCount').value) || 9;
-            let names = '';
-            for (let i = 0; i < count; i++) {
-                names += generateRandomName() + (i < count - 1 ? ', ' : '');
-            }
-            alert(`Random names generated:\n\n${names}\n\nCopy these to use as custom names!`);
-        }
+        function generateRandomNames() {
+            const count = parseInt(document.getElementById('entryCount').value) || 9;
+            let names = '';
+            for (let i = 0; i < count; i++) {
+                names += generateRandomName() + (i < count - 1 ? ', ' : '');
+            }
+            alert(`Random names generated:\n\n${names}\n\nCopy these to use as custom names!`);
+        }
 
-        function toggleTableView() {
-            const table = document.getElementById('tableView');
-            table.style.display = table.style.display === 'none' ? 'block' : 'none';
-        }
+        function toggleTableView() {
+            const table = document.getElementById('tableView');
+            table.style.display = table.style.display === 'none' ? 'block' : 'none';
+        }
 
-        function randomPick(arr) {
-            return arr[Math.floor(Math.random() * arr.length)];
-        }
+        function randomPickWeighted(weights) {
+            let sum = 0;
+            for (let trait in weights) {
+                sum += weights[trait];
+            }
+            let rand = Math.floor(Math.random() * sum);
+            let cumulative = 0;
+            for (let trait in weights) {
+                cumulative += weights[trait];
+                if (rand < cumulative) {
+                    return trait;
+                }
+            }
+        }
 
-        function generateMetadata() {
-            const count = parseInt(document.getElementById('entryCount').value) || 9;
-            const namePrefix = document.getElementById('namePrefix').value || "FUAX";
-            const traits = traitSets[currentTraitSet];
-            
-            generatedData = [];
-            
-            for (let i = 1; i <= count; i++) {
-                generatedData.push({
-                    id: i,
-                    name: `${namePrefix} #${i.toString().padStart(3, '0')}`,
-                    description: `A unique ${currentTraitSet} entity from the Forever Unfinished Artworx collection`,
-                    personality: randomPick(traits.personality),
-                    affinity: randomPick(traits.affinity),
-                    energy: randomPick(traits.energy),
-                    ability: randomPick(traits.ability),
-                    origin: randomPick(traits.origin)
-                });
-            }
-            
-            updateOutput();
-        }
+        function generateMetadata() {
+            const count = parseInt(document.getElementById('entryCount').value) || 9;
+            const namePrefix = document.getElementById('namePrefix').value || "FUAX";
+            const traits = traitSets[currentTraitSet];
+            
+            generatedData = [];
+            
+            for (let i = 1; i <= count; i++) {
+                generatedData.push({
+                    id: i,
+                    name: `${namePrefix} #${i.toString().padStart(3, '0')}`,
+                    description: `A unique ${currentTraitSet} entity from the Forever Unfinished Artworx collection`,
+                    personality: randomPickWeighted(traits.personality),
+                    affinity: randomPickWeighted(traits.affinity),
+                    energy: randomPickWeighted(traits.energy),
+                    ability: randomPickWeighted(traits.ability),
+                    origin: randomPickWeighted(traits.origin),
+                    utility: randomPickWeighted(traits.utility),
+                });
+            }
+            
+            updateOutput();
+        }
 
-        function updateOutput() {
-            const traits = traitSets[currentTraitSet];
-            const totalNFTs = generatedData.length;
-            
-            // Calculate trait frequencies
-            const traitFrequencies = {};
-            Object.keys(traits).forEach(category => {
-                traitFrequencies[category] = {};
-                generatedData.forEach(item => {
-                    const value = item[category];
-                    traitFrequencies[category][value] = (traitFrequencies[category][value] || 0) + 1;
-                });
-            });
-            
-            // Calculate rarity for each NFT
-            generatedData.forEach(item => {
-                let totalRarityScore = 0;
-                item.traitRarities = {};
-                
-                Object.keys(traits).forEach(category => {
-                    const value = item[category];
-                    const frequency = traitFrequencies[category][value];
-                    const rarityPercent = ((totalNFTs - frequency) / totalNFTs) * 100;
-                    
-                    item.traitRarities[category] = {
-                        value: value,
-                        frequency: frequency,
-                        percentage: rarityPercent.toFixed(1)
-                    };
-                    
-                    totalRarityScore += rarityPercent;
-                });
-                
-                // Average rarity across all traits
-                item.rarityScore = (totalRarityScore / Object.keys(traits).length).toFixed(2);
-                
-                // Assign tier
-                if (item.rarityScore >= 70) item.rarityTier = "Legendary";
-                else if (item.rarityScore >= 50) item.rarityTier = "Epic";
-                else if (item.rarityScore >= 30) item.rarityTier = "Rare";
-                else if (item.rarityScore >= 15) item.rarityTier = "Uncommon";
-                else item.rarityTier = "Common";
-            });
-            
-            // Generate CSV with proper rarity info
-            let csv = "ID,Name,Description,Personality,Affinity,Energy,Ability,Origin,Rarity Score,Rarity Tier\n";
-            generatedData.forEach(item => {
-                csv += `${item.id},"${item.name}","${item.description}","${item.personality}","${item.affinity}","${item.energy}","${item.ability}","${item.origin}",${item.rarityScore},${item.rarityTier}\n`;
-            });
-            
-            // Add detailed trait rarity breakdown
-            csv += "\n\n=== TRAIT RARITY BREAKDOWN ===\n";
-            csv += "NFT ID,Trait Type,Trait Value,Appears In Collection,Rarity %\n";
-            generatedData.forEach(item => {
-                Object.keys(item.traitRarities).forEach(category => {
-                    const trait = item.traitRarities[category];
-                    csv += `${item.id},${category},${trait.value},${trait.frequency}/${totalNFTs},${trait.percentage}%\n`;
-                });
-            });
-            
-            document.getElementById('output').value = csv;
-            
-            const table = document.getElementById('metadataTable');
-            table.innerHTML = `
-                <thead>
-                    <tr style="background:#cd5c28; color:#000;">
-                        <th style="padding:10px; border:1px solid #cd5c28;">ID</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Name</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Personality</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Affinity</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Energy</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Ability</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Origin</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Rarity</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Tier</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${generatedData.map(item => {
-                        const tierColor = 
-                            item.rarityTier === "Legendary" ? "#FFD700" :
-                            item.rarityTier === "Epic" ? "#9D4EDD" :
-                            item.rarityTier === "Rare" ? "#3A86FF" :
-                            item.rarityTier === "Uncommon" ? "#06D6A0" : "#00ffff";
-                        
-                        return `
-                        <tr style="color:#00ffff;">
-                            <td style="padding:8px; border:1px solid #cd5c28;">${item.id}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28;">${item.name}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28;">${item.personality}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28;">${item.affinity}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28;">${item.energy}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28;">${item.ability}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28;">${item.origin}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28; font-weight:bold;">${item.rarityScore}%</td>
-                            <td style="padding:8px; border:1px solid #cd5c28; font-weight:bold; color:${tierColor};">${item.rarityTier}</td>
-                        </tr>
-                    `}).join('')}
-                </tbody>
-            `;
-            
-            document.getElementById('tableView').style.display = 'block';
-        }
+        function updateOutput() {
+            const traits = traitSets[currentTraitSet];
+            const totalNFTs = generatedData.length;
+            
+            // Calculate trait frequencies
+            const traitFrequencies = {};
+            Object.keys(traits).forEach(category => {
+                traitFrequencies[category] = {};
+                generatedData.forEach(item => {
+                    const value = item[category];
+                    traitFrequencies[category][value] = (traitFrequencies[category][value] || 0) + 1;
+                });
+            });
+            
+            // Calculate rarity for each NFT
+            generatedData.forEach(item => {
+                let totalRarityScore = 0;
+                item.traitRarities = {};
+                
+                Object.keys(traits).forEach(category => {
+                    const value = item[category];
+                    const frequency = traitFrequencies[category][value];
+                    const rarityPercent = ((totalNFTs - frequency) / totalNFTs) * 100;
+                    
+                    item.traitRarities[category] = {
+                        value: value,
+                        frequency: frequency,
+                        percentage: rarityPercent.toFixed(1)
+                    };
+                    
+                    totalRarityScore += rarityPercent;
+                });
+                
+                // Average rarity across all traits
+                item.rarityScore = (totalRarityScore / Object.keys(traits).length).toFixed(2);
+                
+                // Assign tier
+                if (item.rarityScore >= 70) item.rarityTier = "Legendary";
+                else if (item.rarityScore >= 50) item.rarityTier = "Epic";
+                else if (item.rarityScore >= 30) item.rarityTier = "Rare";
+                else if (item.rarityScore >= 15) item.rarityTier = "Uncommon";
+                else item.rarityTier = "Common";
+            });
+            
+            // Generate CSV with proper rarity info
+            let csv = "ID,Name,Description,Personality,Affinity,Energy,Ability,Origin,Utility,Rarity Score,Rarity Tier\n";
+            generatedData.forEach(item => {
+                csv += `${item.id},"${item.name}","${item.description}","${item.personality}","${item.affinity}","${item.energy}","${item.ability}","${item.origin}","${item.utility}",${item.rarityScore},${item.rarityTier}\n`;
+            });
+            
+            // Add detailed trait rarity breakdown
+            csv += "\n\n=== TRAIT RARITY BREAKDOWN ===\n";
+            csv += "NFT ID,Trait Type,Trait Value,Appears In Collection,Rarity %\n";
+            generatedData.forEach(item => {
+                Object.keys(item.traitRarities).forEach(category => {
+                    const trait = item.traitRarities[category];
+                    csv += `${item.id},${category},${trait.value},${trait.frequency}/${totalNFTs},${trait.percentage}%\n`;
+                });
+            });
+            
+            document.getElementById('output').value = csv;
+            
+            const table = document.getElementById('metadataTable');
+            table.innerHTML = `
+                <thead>
+                    <tr style="background:#cd5c28; color:#000;">
+                        <th style="padding:10px; border:1px solid #cd5c28;">ID</th>
+                        <th style="padding:10px; border:1px solid #cd5c28;">Name</th>
+                        <th style="padding:10px; border:1px solid #cd5c28;">Personality</th>
+                        <th style="padding:10px; border:1px solid #cd5c28;">Affinity</th>
+                        <th style="padding:10px; border:1px solid #cd5c28;">Energy</th>
+                        <th style="padding:10px; border:1px solid #cd5c28;">Ability</th>
+                        <th style="padding:10px; border:1px solid #cd5c28;">Origin</th>
+                        <th style="padding:10px; border:1px solid #cd5c28;">Utility</th>
+                        <th style="padding:10px; border:1px solid #cd5c28;">Rarity</th>
+                        <th style="padding:10px; border:1px solid #cd5c28;">Tier</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${generatedData.map(item => {
+                        const tierColor = 
+                            item.rarityTier === "Legendary" ? "#FFD700" :
+                            item.rarityTier === "Epic" ? "#9D4EDD" :
+                            item.rarityTier === "Rare" ? "#3A86FF" :
+                            item.rarityTier === "Uncommon" ? "#06D6A0" : "#00ffff";
+                        
+                        return `
+                        <tr style="color:#00ffff;">
+                            <td style="padding:8px; border:1px solid #cd5c28;">${item.id}</td>
+                            <td style="padding:8px; border:1px solid #cd5c28;">${item.name}</td>
+                            <td style="padding:8px; border:1px solid #cd5c28;">${item.personality}</td>
+                            <td style="padding:8px; border:1px solid #cd5c28;">${item.affinity}</td>
+                            <td style="padding:8px; border:1px solid #cd5c28;">${item.energy}</td>
+                            <td style="padding:8px; border:1px solid #cd5c28;">${item.ability}</td>
+                            <td style="padding:8px; border:1px solid #cd5c28;">${item.origin}</td>
+                            <td style="padding:8px; border:1px solid #cd5c28;">${item.utility}</td>
+                            <td style="padding:8px; border:1px solid #cd5c28; font-weight:bold;">${item.rarityScore}%</td>
+                            <td style="padding:8px; border:1px solid #cd5c28; font-weight:bold; color:${tierColor};">${item.rarityTier}</td>
+                        </tr>
+                    `}).join('')}
+                </tbody>
+            `;
+            
+            document.getElementById('tableView').style.display = 'block';
+        }
 
-        function downloadCSV() {
-            if (generatedData.length === 0) {
-                alert('Generate metadata first before downloading!');
-                return;
-            }
-            
-            const csvContent = document.getElementById('output').value;
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            const timestamp = new Date().toISOString().slice(0,10);
-            const filename = `FUAX_metadata_${currentTraitSet}_${timestamp}.csv`;
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+        function downloadCSV() {
+            if (generatedData.length === 0) {
+                alert('Generate metadata first before downloading!');
+                return;
+            }
+            
+            const csvContent = document.getElementById('output').value;
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const timestamp = new Date().toISOString().slice(0,10);
+            const filename = `FUAX_metadata_${currentTraitSet}_${timestamp}.csv`;
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
 
-        function clearOutput() {
-            document.getElementById('output').value = '';
-            document.getElementById('tableView').style.display = 'none';
-            generatedData = [];
-        }
-    </script>
+        function clearOutput() {
+            document.getElementById('output').value = '';
+            document.getElementById('tableView').style.display = 'none';
+            generatedData = [];
+        }
+    </script>
 </body>
 </html>
