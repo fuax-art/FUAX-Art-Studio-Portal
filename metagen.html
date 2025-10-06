@@ -301,10 +301,10 @@
                 item.rarityScore = (totalRarityScore / Object.keys(traits).length).toFixed(2);
                 
                 // Assign tier
-                if (item.rarityScore >= 70) item.rarityTier = "Legendary";
-                else if (item.rarityScore >= 50) item.rarityTier = "Epic";
-                else if (item.rarityScore >= 30) item.rarityTier = "Rare";
-                else if (item.rarityScore >= 15) item.rarityTier = "Uncommon";
+                if (item.rarityScore >= 80) item.rarityTier = "Legendary";
+                else if (item.rarityScore >= 60) item.rarityTier = "Epic";
+                else if (item.rarityScore >= 40) item.rarityTier = "Rare";
+                else if (item.rarityScore >= 25) item.rarityTier = "Uncommon";
                 else item.rarityTier = "Common";
             });
             
