@@ -278,43 +278,46 @@
                 });
             });
             
-            // Calculate rarity for each NFT
+            // Calculate and assign rarity for each NFT
             generatedData.forEach(item => {
-                let totalRarityScore = 0;
+                let rarityScore = 1; // Start with a score of 1 for multiplication
                 item.traitRarities = {};
                 
                 Object.keys(traits).forEach(category => {
                     const value = item[category];
                     const frequency = traitFrequencies[category][value];
-                    const rarityPercent = ((totalNFTs - frequency) / totalNFTs) * 100;
+                    const rarityPercent = (frequency / totalNFTs); // Probability
                     
                     item.traitRarities[category] = {
                         value: value,
                         frequency: frequency,
-                        percentage: rarityPercent.toFixed(1)
+                        percentage: (rarityPercent * 100).toFixed(1)
                     };
                     
-                    totalRarityScore += rarityPercent;
+                    // Rarity score based on trait probability
+                    rarityScore *= (1 / rarityPercent);
                 });
                 
-                // Average rarity across all traits
-                item.rarityScore = (totalRarityScore / Object.keys(traits).length).toFixed(2);
+                item.rarityScore = rarityScore.toFixed(2);
                 
-                // Assign tier
-                if (item.rarityScore >= 85) item.rarityTier = "Legendary";
-                else if (item.rarityScore >= 70) item.rarityTier = "Epic";
-                else if (item.rarityScore >= 60) item.rarityTier = "Rare";
-                else if (item.rarityScore >= 35) item.rarityTier = "Uncommon";
+                // Assign tier based on the new score distribution
+                // These thresholds will give you a better distribution
+                if (item.rarityScore >= 100000) item.rarityTier = "Legendary";
+                else if (item.rarityScore >= 1000) item.rarityTier = "Epic";
+                else if (item.rarityScore >= 100) item.rarityTier = "Rare";
+                else if (item.rarityScore >= 20) item.rarityTier = "Uncommon";
                 else item.rarityTier = "Common";
             });
             
-            // Generate CSV with proper rarity info
+            // Sort by rarity score (highest first) for better display
+            generatedData.sort((a, b) => b.rarityScore - a.rarityScore);
+
+            // The rest of your code for output and table view can stay the same
             let csv = "ID,Name,Description,Personality,Affinity,Energy,Ability,Origin,Utility,Rarity Score,Rarity Tier\n";
             generatedData.forEach(item => {
                 csv += `${item.id},"${item.name}","${item.description}","${item.personality}","${item.affinity}","${item.energy}","${item.ability}","${item.origin}","${item.utility}",${item.rarityScore},${item.rarityTier}\n`;
             });
             
-            // Add detailed trait rarity breakdown
             csv += "\n\n=== TRAIT RARITY BREAKDOWN ===\n";
             csv += "NFT ID,Trait Type,Trait Value,Appears In Collection,Rarity %\n";
             generatedData.forEach(item => {
@@ -360,7 +363,7 @@
                             <td style="padding:8px; border:1px solid #cd5c28;">${item.ability}</td>
                             <td style="padding:8px; border:1px solid #cd5c28;">${item.origin}</td>
                             <td style="padding:8px; border:1px solid #cd5c28;">${item.utility}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28; font-weight:bold;">${item.rarityScore}%</td>
+                            <td style="padding:8px; border:1px solid #cd5c28; font-weight:bold;">${item.rarityScore}</td>
                             <td style="padding:8px; border:1px solid #cd5c28; font-weight:bold; color:${tierColor};">${item.rarityTier}</td>
                         </tr>
                         `;
