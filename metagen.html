@@ -302,10 +302,10 @@
                 
                 // Assign tier based on the new score distribution
                 // These thresholds will give you a better distribution
-                if (item.rarityScore >= 50000) item.rarityTier = "Legendary";
+                if (item.rarityScore >= 25000) item.rarityTier = "Legendary";
                 else if (item.rarityScore >= 500) item.rarityTier = "Epic";
                 else if (item.rarityScore >= 50) item.rarityTier = "Rare";
-                else if (item.rarityScore >= 10) item.rarityTier = "Uncommon";
+                else if (item.rarityScore >= 5) item.rarityTier = "Uncommon";
                 else item.rarityTier = "Common";
             });
             
