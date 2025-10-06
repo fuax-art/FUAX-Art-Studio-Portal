@@ -241,28 +241,50 @@
         }
 
         function generateMetadata() {
-            const count = parseInt(document.getElementById('entryCount').value) || 9;
-            const namePrefix = document.getElementById('namePrefix').value || "FUAX";
-            const traits = traitSets[currentTraitSet];
-            
-            generatedData = [];
-            
-            for (let i = 1; i <= count; i++) {
-                generatedData.push({
-                    id: i,
-                    name: `${namePrefix} #${i.toString().padStart(3, '0')}`,
-                    description: `A unique ${currentTraitSet} entity from the Forever Unfinished Artworx collection`,
-                    personality: randomPickWeighted(traits.personality),
-                    affinity: randomPickWeighted(traits.affinity),
-                    energy: randomPickWeighted(traits.energy),
-                    ability: randomPickWeighted(traits.ability),
-                    origin: randomPickWeighted(traits.origin),
-                    utility: randomPickWeighted(traits.utility),
-                });
-            }
-            
-            updateOutput();
-        }
+    const count = parseInt(document.getElementById('entryCount').value) || 100;
+    const namePrefix = document.getElementById('namePrefix').value || "FUAX";
+    const traits = traitSets[currentTraitSet];
+    generatedData = [];
+    
+    // Determine the number of NFTs you want to be "common"
+    const numToForceCommon = Math.floor(count * 0.2); // 20% of the collection will be common
+    
+    // Force common NFTs
+    for (let i = 1; i <= numToForceCommon; i++) {
+        generatedData.push({
+            id: i,
+            name: `${namePrefix} #${i.toString().padStart(3, '0')}`,
+            description: `A unique ${currentTraitSet} entity from the Forever Unfinished Artworx collection`,
+            // Set traits to the most common ones for the selected set
+            personality: Object.keys(traits.personality)[0],
+            affinity: Object.keys(traits.affinity)[0],
+            energy: Object.keys(traits.energy)[0],
+            ability: Object.keys(traits.ability)[0],
+            origin: Object.keys(traits.origin)[0],
+            utility: Object.keys(traits.utility)[0],
+        });
+    }
+
+    // Generate the rest of the collection randomly
+    for (let i = numToForceCommon + 1; i <= count; i++) {
+        generatedData.push({
+            id: i,
+            name: `${namePrefix} #${i.toString().padStart(3, '0')}`,
+            description: `A unique ${currentTraitSet} entity from the Forever Unfinished Artworx collection`,
+            personality: randomPickWeighted(traits.personality),
+            affinity: randomPickWeighted(traits.affinity),
+            energy: randomPickWeighted(traits.energy),
+            ability: randomPickWeighted(traits.ability),
+            origin: randomPickWeighted(traits.origin),
+            utility: randomPickWeighted(traits.utility),
+        });
+    }
+
+    // Shuffle the array to randomize the order
+    generatedData.sort(() => Math.random() - 0.5);
+
+    updateOutput();
+}
 
         function updateOutput() {
             const traits = traitSets[currentTraitSet];
