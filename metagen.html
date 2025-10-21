@@ -25,10 +25,10 @@
             background: rgba(0, 0, 0, 0.85);
             padding: 20px;
             border-radius: 10px;
-            border: 1px solid #cd5c28;
+            border: 1px solid #4c1800;
         }
         button {
-            background: #cd5c28;
+            background: #4c1800;
             color: #00ffff;
             border: none;
             padding: 15px 30px;
@@ -43,7 +43,7 @@
         input, select {
             background: rgba(0, 0, 0, 0.7);
             color: #00ffff;
-            border: 1px solid #cd5c28;
+            border: 1px solid #4c1800;
             padding: 8px;
             border-radius: 4px;
         }
@@ -52,7 +52,7 @@
             height: 400px;
             background: rgba(0, 0, 0, 0.9);
             color: #00ffff;
-            border: 1px solid #cd5c28;
+            border: 1px solid #4c1800;
             padding: 10px;
             font-family: monospace;
         }
@@ -61,12 +61,12 @@
             margin: 10px;
             padding: 10px 20px;
             background: rgba(205, 92, 40, 0.3);
-            border: 2px solid #cd5c28;
+            border: 2px solid #4c1800;
             border-radius: 8px;
             cursor: pointer;
         }
         .trait-set.active {
-            background: #cd5c28;
+            background: #4c1800;
             color: #000;
         }
         .controls {
@@ -101,7 +101,7 @@
 
     <div class="container">
         <div style="text-align:center; margin-bottom:1.5em;">
-            <div style="font-size:1.8em; font-weight:bold; color:#00ffff; letter-spacing:2px;">Forever Unfinished Artworx <span style="font-size:0.9em; color:#cd5c28;">(FUAX)</span></div>
+            <div style="font-size:1.8em; font-weight:bold; color:#00ffff; letter-spacing:2px;">Forever Unfinished Artworx <span style="font-size:0.9em; color:#4c1800;">(FUAX)</span></div>
             <div style="font-size:1.1em; color:#00cccc; margin-top:0.3em;">Metadata Generator</div>
         </div>
 
@@ -172,7 +172,7 @@
                     "Deep Web Spawn": 13.8, "Glitch Accident": 9.2, "Rogue AI Fragment": 5.4,
                     "Open Source": 1.9, "Lost Code": 0.3, "Void-born": 0.1
                 },
-                utility: { "None": 90, "High-Res Access": 6.5, "Future Airdrop": 2.4, "Genesis": 1.1 }
+                utility: { "None": 90, "High-Res Access": 5.5, "Future Airdrop": 3.4, "Genesis": 1.1 }
             },
             monster: {
                 personality: { "Fierce": 30, "Cunning": 30, "Wild": 15, "Ancient": 15, "Chaotic": 5, "Primal": 2, "Unpredictable": 2, "Ghostly": 1},
@@ -407,17 +407,17 @@
             const table = document.getElementById('metadataTable');
             table.innerHTML = `
                 <thead>
-                    <tr style="background:#cd5c28; color:#000;">
-                        <th style="padding:10px; border:1px solid #cd5c28;">ID</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Name</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Personality</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Affinity</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Energy</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Ability</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Origin</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Utility</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Rarity</th>
-                        <th style="padding:10px; border:1px solid #cd5c28;">Tier</th>
+                    <tr style="background:#4c1800; color:#000;">
+                        <th style="padding:10px; border:1px solid #4c1800;">ID</th>
+                        <th style="padding:10px; border:1px solid #4c1800;">Name</th>
+                        <th style="padding:10px; border:1px solid #4c1800;">Personality</th>
+                        <th style="padding:10px; border:1px solid #4c1800;">Affinity</th>
+                        <th style="padding:10px; border:1px solid #4c1800;">Energy</th>
+                        <th style="padding:10px; border:1px solid #4c1800;">Ability</th>
+                        <th style="padding:10px; border:1px solid #4c1800;">Origin</th>
+                        <th style="padding:10px; border:1px solid #4c1800;">Utility</th>
+                        <th style="padding:10px; border:1px solid #4c1800;">Rarity</th>
+                        <th style="padding:10px; border:1px solid #4c1800;">Tier</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -430,16 +430,16 @@
                         
                         return `
                         <tr style="color:#00ffff;">
-                            <td style="padding:8px; border:1px solid #cd5c28;">${item.id}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28;">${item.name}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28;">${item.personality}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28;">${item.affinity}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28;">${item.energy}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28;">${item.ability}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28;">${item.origin}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28;">${item.utility}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28; font-weight:bold;">${item.rarityScore}</td>
-                            <td style="padding:8px; border:1px solid #cd5c28; font-weight:bold; color:${tierColor};">${item.rarityTier}</td>
+                            <td style="padding:8px; border:1px solid #4c1800;">${item.id}</td>
+                            <td style="padding:8px; border:1px solid #4c1800;">${item.name}</td>
+                            <td style="padding:8px; border:1px solid #4c1800;">${item.personality}</td>
+                            <td style="padding:8px; border:1px solid #4c1800;">${item.affinity}</td>
+                            <td style="padding:8px; border:1px solid #4c1800;">${item.energy}</td>
+                            <td style="padding:8px; border:1px solid #4c1800;">${item.ability}</td>
+                            <td style="padding:8px; border:1px solid #4c1800;">${item.origin}</td>
+                            <td style="padding:8px; border:1px solid #4c1800;">${item.utility}</td>
+                            <td style="padding:8px; border:1px solid #4c1800; font-weight:bold;">${item.rarityScore}</td>
+                            <td style="padding:8px; border:1px solid #4c1800; font-weight:bold; color:${tierColor};">${item.rarityTier}</td>
                         </tr>
                         `;
                     }).join('')}
