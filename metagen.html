@@ -261,50 +261,50 @@
         }
 
         function generateMetadata() {
-    const count = parseInt(document.getElementById('entryCount').value) || 100;
-    const namePrefix = document.getElementById('namePrefix').value || "FUAX";
-    const traits = traitSets[currentTraitSet];
-    generatedData = [];
-    
-    // Determine the number of NFTs you want to be "common"
-    const numToForceCommon = Math.floor(count * 0.3); // 30% of the collection will be common
-    
-    // Force common NFTs
-    for (let i = 1; i <= numToForceCommon; i++) {
-        generatedData.push({
-            id: i,
-            name: `${namePrefix} #${i.toString().padStart(3, '0')}`,
-            description: `A unique ${currentTraitSet} entity from the Forever Unfinished Artworx collection`,
-            // Set traits to the most common ones for the selected set
-            personality: Object.keys(traits.personality)[0],
-            affinity: Object.keys(traits.affinity)[0],
-            energy: Object.keys(traits.energy)[0],
-            ability: Object.keys(traits.ability)[0],
-            origin: Object.keys(traits.origin)[0],
-            utility: Object.keys(traits.utility)[0],
-        });
-    }
+            const count = parseInt(document.getElementById('entryCount').value) || 100;
+            const namePrefix = document.getElementById('namePrefix').value || "FUAX";
+            const traits = traitSets[currentTraitSet];
+            generatedData = [];
+            
+            // Determine the number of NFTs you want to be "common"
+            const numToForceCommon = Math.floor(count * 0.3); // 30% of the collection will be common
+            
+            // Force common NFTs
+            for (let i = 1; i <= numToForceCommon; i++) {
+                generatedData.push({
+                    id: i,
+                    name: `${namePrefix} #${i.toString().padStart(3, '0')}`,
+                    description: `A unique ${currentTraitSet} entity from the Forever Unfinished Artworx collection`,
+                    personality: Object.keys(traits.personality)[0],
+                    affinity: Object.keys(traits.affinity)[0],
+                    energy: Object.keys(traits.energy)[0],
+                    ability: Object.keys(traits.ability)[0],
+                    origin: Object.keys(traits.origin)[0],
+                    utility: Object.keys(traits.utility)[0],
+                    forcedTier: "Common"
+                });
+            }
 
-    // Generate the rest of the collection randomly
-    for (let i = numToForceCommon + 1; i <= count; i++) {
-        generatedData.push({
-            id: i,
-            name: `${namePrefix} #${i.toString().padStart(3, '0')}`,
-            description: `A unique ${currentTraitSet} entity from the Forever Unfinished Artworx collection`,
-            personality: randomPickWeighted(traits.personality),
-            affinity: randomPickWeighted(traits.affinity),
-            energy: randomPickWeighted(traits.energy),
-            ability: randomPickWeighted(traits.ability),
-            origin: randomPickWeighted(traits.origin),
-            utility: randomPickWeighted(traits.utility),
-        });
-    }
+            // Generate the rest of the collection randomly
+            for (let i = numToForceCommon + 1; i <= count; i++) {
+                generatedData.push({
+                    id: i,
+                    name: `${namePrefix} #${i.toString().padStart(3, '0')}`,
+                    description: `A unique ${currentTraitSet} entity from the Forever Unfinished Artworx collection`,
+                    personality: randomPickWeighted(traits.personality),
+                    affinity: randomPickWeighted(traits.affinity),
+                    energy: randomPickWeighted(traits.energy),
+                    ability: randomPickWeighted(traits.ability),
+                    origin: randomPickWeighted(traits.origin),
+                    utility: randomPickWeighted(traits.utility),
+                });
+            }
 
-    // Shuffle the array to randomize the order
-    generatedData.sort(() => Math.random() - 0.5);
+            // Shuffle the array to randomize the order
+            generatedData.sort(() => Math.random() - 0.5);
 
-    updateOutput();
-}
+            updateOutput();
+        }
 
         function updateOutput() {
             const traits = traitSets[currentTraitSet];
@@ -322,13 +322,35 @@
             
             // Calculate and assign rarity for each NFT
             generatedData.forEach(item => {
-                let rarityScore = 1; // Start with a score of 1 for multiplication
+                // If this NFT has a forced tier (commons), skip calculation and use the forced tier
+                if (item.forcedTier) {
+                    item.rarityTier = item.forcedTier;
+                    item.rarityScore = "1.00";
+                    item.traitRarities = {};
+                    
+                    // Still calculate trait rarities for display purposes
+                    Object.keys(traits).forEach(category => {
+                        const value = item[category];
+                        const frequency = traitFrequencies[category][value];
+                        const rarityPercent = (frequency / totalNFTs);
+                        
+                        item.traitRarities[category] = {
+                            value: value,
+                            frequency: frequency,
+                            percentage: (rarityPercent * 100).toFixed(1)
+                        };
+                    });
+                    return; // Skip normal rarity calculation
+                }
+                
+                // Normal rarity calculation for non-forced NFTs
+                let rarityScore = 1;
                 item.traitRarities = {};
                 
                 Object.keys(traits).forEach(category => {
                     const value = item[category];
                     const frequency = traitFrequencies[category][value];
-                    const rarityPercent = (frequency / totalNFTs); // Probability
+                    const rarityPercent = (frequency / totalNFTs);
                     
                     item.traitRarities[category] = {
                         value: value,
@@ -336,20 +358,31 @@
                         percentage: (rarityPercent * 100).toFixed(1)
                     };
                     
-                    // Rarity score based on trait probability
                     rarityScore *= (1 / rarityPercent);
                 });
                 
                 item.rarityScore = rarityScore.toFixed(2);
                 
-                // Assign tier based on the new score distribution
-                // These thresholds will give you a better distribution
-                if (item.rarityScore >= 25000) item.rarityTier = "Legendary";
-                else if (item.rarityScore >= 500) item.rarityTier = "Epic";
-                else if (item.rarityScore >= 50) item.rarityTier = "Rare";
-                else if (item.rarityScore >= 25) item.rarityTier = "Uncommon";
+                // Assign tier based on score distribution
+                if (item.rarityScore >= 500000) item.rarityTier = "Legendary";
+                else if (item.rarityScore >= 10000) item.rarityTier = "Epic";
+                else if (item.rarityScore >= 1000) item.rarityTier = "Rare";
+                else if (item.rarityScore >= 100) item.rarityTier = "Uncommon";
                 else item.rarityTier = "Common";
             });
+            
+            // Now assign utility to half of the legendaries
+            const legendaries = generatedData.filter(item => item.rarityTier === "Legendary" && !item.forcedTier);
+            const numLegendariesWithUtility = Math.floor(legendaries.length / 2);
+            
+            // Shuffle legendaries and assign utility to first half
+            legendaries.sort(() => Math.random() - 0.5);
+            
+            const utilityOptions = Object.keys(traits.utility).filter(u => u !== "None");
+            for (let i = 0; i < numLegendariesWithUtility; i++) {
+                const randomUtility = utilityOptions[Math.floor(Math.random() * utilityOptions.length)];
+                legendaries[i].utility = randomUtility;
+            }
             
             // Sort by rarity score (highest first) for better display
             generatedData.sort((a, b) => b.rarityScore - a.rarityScore);
