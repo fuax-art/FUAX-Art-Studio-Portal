@@ -108,11 +108,11 @@
         <div class="controls">
             <div>
                 <label>Number of Entries (1-100):</label>
-                <input type="number" id="entryCount" min="1" max="100" value="13">
+                <input type="number" id="entryCount" min="1" max="100" value="50">
             </div>
             <div>
                 <label>Custom Name Prefix (optional):</label>
-                <input type="text" id="namePrefix" placeholder="e.g. CyberPug">
+                <input type="text" id="namePrefix" value="CyberPug">
             </div>
         </div>
 
@@ -267,7 +267,7 @@
             generatedData = [];
             
             // Determine the number of NFTs you want to be "common"
-            const numToForceCommon = Math.floor(count * 0.3); // 30% of the collection will be common
+            const numToForceCommon = Math.floor(count * 0.2); // 20% of the collection will be common
             
             // Force common NFTs
             for (let i = 1; i <= numToForceCommon; i++) {
@@ -364,8 +364,8 @@
                 item.rarityScore = rarityScore.toFixed(2);
                 
                 // Assign tier based on score distribution
-                if (item.rarityScore >= 500000) item.rarityTier = "Legendary";
-                else if (item.rarityScore >= 10000) item.rarityTier = "Epic";
+                if (item.rarityScore >= 300000) item.rarityTier = "Legendary";
+                else if (item.rarityScore >=9000) item.rarityTier = "Epic";
                 else if (item.rarityScore >= 1000) item.rarityTier = "Rare";
                 else if (item.rarityScore >= 100) item.rarityTier = "Uncommon";
                 else item.rarityTier = "Common";
