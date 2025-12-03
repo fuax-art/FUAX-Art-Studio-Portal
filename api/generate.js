@@ -3,80 +3,80 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
+  if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
-  const stabilityKey = process.env.STABILITY_API_KEY;
-  if (!stabilityKey) {
-    return res.status(500).json({ error: 'API key not configured' });
+  const hfToken = process.env.HUGGINGFACE_API_KEY;
+  if (!hfToken) {
+    return res.status(500).json({ 
+      success: false, 
+      error: 'HUGGINGFACE_API_KEY not configured. Add it in Vercel/Netlify environment variables.' 
+    });
   }
 
-  const { prompt, width = 1024, height = 1024, steps = 20, cfg_scale = 7 } = req.body;
-
+  const { prompt } = req.body;
   if (!prompt) {
-    return res.status(400).json({ error: 'Prompt required' });
+    return res.status(400).json({ success: false, error: 'Prompt required' });
   }
 
   try {
-    const response = await fetch('https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${stabilityKey}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        text_prompts: [{ text: prompt, weight: 1 }],
-        cfg_scale: cfg_scale,
-        height: height,
-        width: width,
-        steps: steps,
-        samples: 1,
-        style_preset: 'digital-art'
-      })
-    });
-
-    const responseText = await response.text();
+    console.log('Generating with prompt:', prompt);
     
+    // Using Stable Diffusion XL - free on HuggingFace
+    const response = await fetch(
+      'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${hfToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          inputs: prompt,
+          parameters: {
+            negative_prompt: "blurry, bad quality, distorted, ugly, deformed",
+            num_inference_steps: 30,
+            guidance_scale: 7.5
+          }
+        })
+      }
+    );
+
     if (!response.ok) {
-      return res.status(200).json({ 
+      const errorText = await response.text();
+      console.error('HuggingFace API Error:', response.status, errorText);
+      
+      // Model might be loading (common on first use)
+      if (response.status === 503) {
+        return res.json({ 
+          success: false,
+          error: 'Model is loading, please try again in 20 seconds',
+          details: errorText
+        });
+      }
+      
+      return res.json({ 
         success: false,
         error: `API Error ${response.status}`,
-        details: responseText
+        details: errorText
       });
     }
 
-    // Try to parse JSON
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (parseError) {
-      return res.status(200).json({ 
-        success: false,
-        error: 'Invalid JSON response',
-        details: responseText.substring(0, 200)
-      });
-    }
+    // Response is the image blob
+    const imageBuffer = await response.arrayBuffer();
+    const base64Image = Buffer.from(imageBuffer).toString('base64');
     
-    if (data.artifacts && data.artifacts[0]) {
-      const base64Image = data.artifacts[0].base64;
-      return res.json({ 
-        success: true, 
-        imageUrl: `data:image/png;base64,${base64Image}`
-      });
-    } else {
-      return res.json({ 
-        success: false, 
-        error: 'No image in response',
-        details: JSON.stringify(data)
-      });
-    }
+    console.log('Image generated successfully');
+    
+    return res.json({ 
+      success: true, 
+      imageUrl: `data:image/png;base64,${base64Image}`
+    });
+    
   } catch (error) {
+    console.error('Generation Error:', error);
     return res.json({ 
       success: false, 
       error: 'Request failed', 
