@@ -23,6 +23,11 @@
         box-shadow: 0 10px 25px rgba(0, 255, 255, 0.5);
         background: rgba(205, 92, 40, 0.8);
     }
+    .layer-preview.selected {
+        background: rgba(205, 92, 40, 0.9);
+        box-shadow: 0 0 20px rgba(205, 92, 40, 0.8);
+        transform: scale(1.05);
+    }
     .artwork-card {
         transition: all 0.3s ease;
         background: rgba(0, 0, 0, 0.277);
@@ -45,26 +50,27 @@
         background-color: #cd5c28;
         border-radius: 20px;
     }
-    /* Transparent panels */
     .bg-white {
         background: rgba(0, 0, 0, 0.283) !important;
         color: #00ffff !important;
     }
-    /* Text colors */
     .text-gray-800, .text-gray-700, .text-gray-900 {
         color: #00ffff !important;
     }
     .text-gray-500, .text-gray-400, .text-gray-600 {
         color: #00cccc !important;
     }
-    /* Buttons */
     .bg-indigo-600 {
         background: #cd5c28 !important;
     }
     .bg-indigo-600:hover {
         background: #b34a20 !important;
     }
-    /* Input fields */
+    .bg-indigo-600:disabled {
+        background: #5a2812 !important;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
     input, textarea, select {
         background: rgba(0, 0, 0, 0.396) !important;
         color: #00ffff !important;
@@ -73,9 +79,29 @@
     input::placeholder, textarea::placeholder {
         color: #00cccc !important;
     }
-    /* Border colors */
     .border-gray-300, .border-gray-200 {
         border-color: #cd5c28 !important;
+    }
+    .loading-spinner {
+        border: 3px solid rgba(0, 255, 255, 0.3);
+        border-top: 3px solid #00ffff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .model-loading-notice {
+        background: rgba(255, 165, 0, 0.2);
+        border: 1px solid #ffa500;
+        color: #ffa500;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        margin-top: 8px;
     }
 </style>
 </head>
@@ -131,17 +157,18 @@
                 <div class="space-y-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Collection Name</label>
-                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="My Awesome Collection">
+                        <input type="text" id="collection-name" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="My Awesome Collection">
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Number of Artworks</label>
-                        <input type="number" min="1" max="5" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <input type="number" id="artwork-count" min="1" max="5" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <p class="text-xs text-gray-500 mt-1">Max 5 artworks per generation</p>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Prompt</label>
-                        <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Describe the artwork you want to generate"></textarea>
+                        <textarea id="prompt-input" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Describe the artwork you want to generate..."></textarea>
                     </div>
 
                     <div id="traits-preview" class="hidden">
@@ -162,15 +189,20 @@
                                     </label>
                                 </div>
                                 <p class="text-xs text-gray-500">JSON or CSV file with traits</p>
+                                <p id="file-name" class="text-xs text-green-400 mt-1"></p>
                             </div>
                         </div>
                     </div>
                     
-                    <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center justify-center font-medium transition-colors duration-200">
+                    <button id="generate-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center justify-center font-medium transition-colors duration-200">
                         <i data-feather="zap" class="mr-2"></i> Generate Collection
                     </button>
                     <div id="generation-status" class="text-sm text-center text-gray-500 hidden">
+                        <div class="loading-spinner mx-auto mb-2"></div>
                         Generating artworx... <span id="progress">0%</span>
+                    </div>
+                    <div id="model-loading-warning" class="model-loading-notice hidden">
+                        ⏳ Model is loading... This can take 20-30 seconds on first use. Please wait.
                     </div>
                 </div>
             </div>
@@ -198,12 +230,12 @@
                                 </button>
                             </div>
                             <div class="mt-2 grid grid-cols-3 gap-2">
-                                <div class="layer-preview bg-blue-100 rounded p-1 text-center text-xs cursor-pointer">Blue</div>
-                                <div class="layer-preview bg-red-100 rounded p-1 text-center text-xs cursor-pointer">Red</div>
-                                <div class="layer-preview bg-green-100 rounded p-1 text-center text-xs cursor-pointer">Green</div>
-                                <div class="layer-preview bg-yellow-100 rounded p-1 text-center text-xs cursor-pointer">Yellow</div>
-                                <div class="layer-preview bg-purple-100 rounded p-1 text-center text-xs cursor-pointer">Magenta</div>
-                                <div class="layer-preview bg-pink-100 rounded p-1 text-center text-xs cursor-pointer">Cyan</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="background" data-trait-value="Blue">Blue</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="background" data-trait-value="Red">Red</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="background" data-trait-value="Green">Green</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="background" data-trait-value="Yellow">Yellow</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="background" data-trait-value="Purple">Purple</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="background" data-trait-value="Cyan">Cyan</div>
                             </div>
                         </div>
                         
@@ -215,12 +247,12 @@
                                 </button>
                             </div>
                             <div class="mt-2 grid grid-cols-3 gap-2">
-                                <div class="layer-preview bg-slate-100 rounded p-1 text-center text-xs cursor-pointer">Human</div>
-                                <div class="layer-preview bg-slate-100 rounded p-1 text-center text-xs cursor-pointer">Robot</div>
-                                <div class="layer-preview bg-slate-100 rounded p-1 text-center text-xs cursor-pointer">Alien</div>
-                                <div class="layer-preview bg-slate-100 rounded p-1 text-center text-xs cursor-pointer">Animal</div>
-                                <div class="layer-preview bg-slate-100 rounded p-1 text-center text-xs cursor-pointer">Monster</div>
-                                <div class="layer-preview bg-slate-100 rounded p-1 text-center text-xs cursor-pointer">Ghost</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="character" data-trait-value="Human">Human</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="character" data-trait-value="Robot">Robot</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="character" data-trait-value="Alien">Alien</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="character" data-trait-value="Animal">Animal</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="character" data-trait-value="Monster">Monster</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="character" data-trait-value="Ghost">Ghost</div>
                             </div>
                         </div>
                         
@@ -232,12 +264,12 @@
                                 </button>
                             </div>
                             <div class="mt-2 grid grid-cols-3 gap-2">
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">Beanie</div>
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">Sun Glasses</div>
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">Brass Knuckles</div>
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">Hoodie</div>
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">Baseball Bat</div>
-                                <div class="layer-preview bg-gray-100 rounded p-1 text-center text-xs cursor-pointer">None</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="accessories" data-trait-value="Beanie">Beanie</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="accessories" data-trait-value="Sunglasses">Sunglasses</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="accessories" data-trait-value="Brass Knuckles">Brass Knuckles</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="accessories" data-trait-value="Hoodie">Hoodie</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="accessories" data-trait-value="Baseball Bat">Baseball Bat</div>
+                                <div class="layer-preview rounded p-1 text-center text-xs cursor-pointer" data-trait-type="accessories" data-trait-value="None">None</div>
                             </div>
                         </div>
                     </div>
@@ -251,7 +283,7 @@
                 </h2>
                 
                 <div class="space-y-4">
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 flex items-center justify-center h-64">
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 flex items-center justify-center h-64" id="main-preview">
                         <div class="text-center">
                             <i data-feather="image" class="mx-auto h-12 w-12 text-gray-400"></i>
                             <h3 class="mt-2 text-sm font-medium text-gray-900">Generated artwork preview</h3>
@@ -260,8 +292,8 @@
                     </div>
                     
                     <div>
-                        <h3 class="text-sm font-medium text-gray-700 mb-2">Sample Outputs</h3>
-                        <div class="grid grid-cols-3 gap-2"id="preview-grid"></div>>
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">Generated Artworks</h3>
+                        <div class="grid grid-cols-3 gap-2" id="preview-grid">
                             <div class="artwork-card bg-gray-100 rounded-lg aspect-square flex items-center justify-center text-xs text-gray-400">Sample 1</div>
                             <div class="artwork-card bg-gray-100 rounded-lg aspect-square flex items-center justify-center text-xs text-gray-400">Sample 2</div>
                             <div class="artwork-card bg-gray-100 rounded-lg aspect-square flex items-center justify-center text-xs text-gray-400">Sample 3</div>
@@ -290,7 +322,7 @@
                     <img src="branding/fuax-logo.png" alt="Forever Unfinished Artworx Logo" style="width:32px; height:auto; display:inline-block; vertical-align:middle; margin-right:8px; background:none; border:none; box-shadow:none; filter:none;" onerror="this.style.display='none'">
                     <span class="text-base text-indigo-600 font-semibold align-middle">Forever Unfinished Artworx (FUAX)</span>
                     <p class="text-center text-base text-gray-400 mt-2">
-                        &copy; 2025 FUAX Art Generator Studio. All rights reserved.
+                        &copy; 2025 FUAX Art Generator Studio. Powered by HuggingFace 🤗
                     </p>
                 </div>
             </div>
@@ -306,50 +338,58 @@
         artworkCount: 1,
         prompt: '',
         metadataFile: null,
-        selectedTraits: {}
+        selectedTraits: {},
+        csvData: null,
+        isGenerating: false
     };
 
     document.addEventListener('DOMContentLoaded', () => {
+        // File upload handling
         const metadataInput = document.getElementById('metadata-file');
         metadataInput.addEventListener('change', (e) => {
             appState.metadataFile = e.target.files[0];
             if (appState.metadataFile) {
+                document.getElementById('file-name').textContent = `✓ ${appState.metadataFile.name}`;
                 parseMetadata();
             }
         });
 
-        document.querySelector('input[placeholder="My Awesome Collection"]').addEventListener('input', (e) => {
+        // Input handling
+        document.getElementById('collection-name').addEventListener('input', (e) => {
             appState.collectionName = e.target.value;
         });
 
-        document.querySelector('input[type="number"]').addEventListener('input', (e) => {
-            appState.artworkCount = parseInt(e.target.value) || 1;
+        document.getElementById('artwork-count').addEventListener('input', (e) => {
+            appState.artworkCount = Math.min(Math.max(parseInt(e.target.value) || 1, 1), 5);
+            e.target.value = appState.artworkCount;
         });
 
-        document.querySelector('textarea').addEventListener('input', (e) => {
+        document.getElementById('prompt-input').addEventListener('input', (e) => {
             appState.prompt = e.target.value;
         });
 
-        document.querySelector('button.bg-indigo-600').addEventListener('click', generateCollection);
-    });
+        // Generate button
+        document.getElementById('generate-btn').addEventListener('click', generateCollection);
 
-    // Trait selection handling
-    document.addEventListener('click', (event) => {
-        if (event.target.closest('.layer-preview')) {
-            const item = event.target.closest('.layer-preview');
-            const traitSection = item.closest('.border-gray-200');
-            const traitType = traitSection.querySelector('h4').textContent.toLowerCase();
-            const traitValue = item.textContent.trim();
-            
-            traitSection.querySelectorAll('.layer-preview').forEach(el => {
-                el.classList.remove('ring-2', 'ring-indigo-500', 'bg-indigo-100');
-            });
-            
-            item.classList.add('ring-2', 'ring-indigo-500', 'bg-indigo-100');
-            appState.selectedTraits[traitType] = traitValue;
-            
-            updateTraitsDisplay();
-        }
+        // Trait selection handling
+        document.addEventListener('click', (event) => {
+            if (event.target.closest('.layer-preview')) {
+                const item = event.target.closest('.layer-preview');
+                const traitType = item.dataset.traitType;
+                const traitValue = item.dataset.traitValue;
+                
+                // Clear other selections in this category
+                document.querySelectorAll(`[data-trait-type="${traitType}"]`).forEach(el => {
+                    el.classList.remove('selected');
+                });
+                
+                // Select this one
+                item.classList.add('selected');
+                appState.selectedTraits[traitType] = traitValue;
+                
+                updateTraitsDisplay();
+            }
+        });
     });
 
     function updateTraitsDisplay() {
@@ -375,7 +415,7 @@
                 if (appState.metadataFile.name.endsWith('.csv')) {
                     const lines = content.split('\n');
                     const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-                    window.csvData = lines.slice(1).map(line => {
+                    appState.csvData = lines.slice(1).map(line => {
                         const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
                         return headers.reduce((obj, header, i) => {
                             obj[header] = values[i] || '';
@@ -383,10 +423,14 @@
                         }, {});
                     }).filter(row => Object.values(row).some(val => val));
                     
-                    showSuccessMessage(`Loaded ${window.csvData.length} entries from CSV`);
+                    showSuccessMessage(`Loaded ${appState.csvData.length} entries from CSV`);
+                } else if (appState.metadataFile.name.endsWith('.json')) {
+                    appState.csvData = JSON.parse(content);
+                    showSuccessMessage(`Loaded ${appState.csvData.length} entries from JSON`);
                 }
             } catch (error) {
                 showErrorMessage('Failed to parse collection data file');
+                console.error(error);
             }
         };
         reader.readAsText(appState.metadataFile);
@@ -409,19 +453,31 @@
     }
 
     async function generateCollection() {
+        if (appState.isGenerating) {
+            return;
+        }
+
         const samplesContainer = document.getElementById('preview-grid');
+        const generateBtn = document.getElementById('generate-btn');
+        const statusDiv = document.getElementById('generation-status');
+        const modelWarning = document.getElementById('model-loading-warning');
+        
         samplesContainer.innerHTML = '';
-        document.getElementById('generation-status').classList.remove('hidden');
+        statusDiv.classList.remove('hidden');
+        generateBtn.disabled = true;
+        appState.isGenerating = true;
         
         let prompts = [];
         let traitPrompt = '';
         
+        // Build trait prompt
         if (Object.keys(appState.selectedTraits).length > 0) {
             traitPrompt = Object.values(appState.selectedTraits).join(' ') + ' ';
         }
         
-        if (appState.metadataFile && window.csvData) {
-            prompts = window.csvData.slice(0, appState.artworkCount).map(item => {
+        // Build prompts array
+        if (appState.csvData && appState.csvData.length > 0) {
+            prompts = appState.csvData.slice(0, appState.artworkCount).map(item => {
                 let csvPrompt = `${item.Personality || ''} ${item['Digital Affinity'] || ''} ${item['Energy Level'] || ''}`.trim();
                 return `${traitPrompt}${csvPrompt} ${appState.prompt}`.trim();
             });
@@ -432,53 +488,103 @@
         
         if (prompts.length === 0 || prompts[0].trim() === '') {
             showErrorMessage('Please enter a prompt or select traits');
-            document.getElementById('generation-status').classList.add('hidden');
+            statusDiv.classList.add('hidden');
+            generateBtn.disabled = false;
+            appState.isGenerating = false;
             return;
         }
+        
+        console.log('Starting generation with prompts:', prompts);
         
         for (let i = 0; i < prompts.length; i++) {
             try {
                 samplesContainer.innerHTML += `
                     <div class="artwork-card rounded-lg aspect-square bg-gray-200 flex items-center justify-center" id="loading-${i}">
-                        <div class="text-xs text-gray-600">Generating ${i+1}...</div>
+                        <div class="loading-spinner"></div>
                     </div>
                 `;
+
+                console.log(`Generating image ${i+1}/${prompts.length}...`);
 
                 const response = await fetch('/api/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        prompt: prompts[i],
-                        width: 1024,
-                        height: 1024
+                        prompt: prompts[i]
                     })
                 });
 
+                console.log('Response status:', response.status);
                 const data = await response.json();
+                console.log('Response data:', data);
                 
                 const loadingElement = document.getElementById(`loading-${i}`);
+                
                 if (data.success && loadingElement) {
                     loadingElement.innerHTML = `
-                        <img src="${data.imageUrl}" class="h-full w-full object-contain rounded" alt="Generated NFT ${i+1}">
+                        <img src="${data.imageUrl}" class="h-full w-full object-cover rounded" alt="Generated NFT ${i+1}">
                     `;
                     loadingElement.classList.remove('bg-gray-200');
                     
+                    // Update main preview with first image
+                    if (i === 0) {
+                        document.getElementById('main-preview').innerHTML = `
+                            <img src="${data.imageUrl}" class="h-full w-full object-contain rounded" alt="Main Preview">
+                        `;
+                    }
+                    
+                    modelWarning.classList.add('hidden');
+                    
                 } else if (loadingElement) {
-                    loadingElement.innerHTML = `<div class="text-xs text-red-500">Failed</div>`;
+                    // Check if model is loading
+                    if (data.error && data.error.includes('loading')) {
+                        modelWarning.classList.remove('hidden');
+                        loadingElement.innerHTML = `
+                            <div class="text-xs text-orange-500 p-2 text-center">
+                                Model loading...<br>Please wait
+                            </div>
+                        `;
+                        // Retry after 20 seconds
+                        console.log('Model loading, will retry in 20 seconds...');
+                        await new Promise(resolve => setTimeout(resolve, 20000));
+                        i--; // Retry this iteration
+                        continue;
+                    } else {
+                        loadingElement.innerHTML = `
+                            <div class="text-xs text-red-500 p-2 text-center">
+                                Failed: ${data.error || 'Unknown error'}
+                            </div>
+                        `;
+                        console.error('Generation failed:', data);
+                    }
                 }
     
-            
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error generating image:', error);
+                const loadingElement = document.getElementById(`loading-${i}`);
+                if (loadingElement) {
+                    loadingElement.innerHTML = `
+                        <div class="text-xs text-red-500 p-2 text-center">
+                            Error: ${error.message}
+                        </div>
+                    `;
+                }
             }
             
             document.getElementById('progress').textContent = `${Math.round(((i+1)/prompts.length)*100)}%`;
+            
+            // Small delay between generations to avoid rate limiting
+            if (i < prompts.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
         }
         
-        document.getElementById('generation-status').classList.add('hidden');
+        statusDiv.classList.add('hidden');
+        modelWarning.classList.add('hidden');
+        generateBtn.disabled = false;
+        appState.isGenerating = false;
         showSuccessMessage('Collection generation complete!');
-        
-}
+    }
     
 </script>
 </body>
