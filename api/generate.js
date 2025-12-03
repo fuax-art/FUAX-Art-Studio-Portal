@@ -1,86 +1,63 @@
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+ // CORS (keeps browser happy)
+ res.setHeader('Access-Control-Allow-Origin', '');
+ res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+ res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') {
-    return res.status(405).json({ success: false, error: 'Method not allowed' });
-  }
+if (req.method === 'OPTIONS') return res.status(200).end();
+ if (req.method !== 'POST') return res.status(405).json({ success: false, error: 'Method not allowed' });
 
-  const hfToken = process.env.HUGGINGFACE_API_KEY;
-  if (!hfToken) {
-    return res.status(500).json({ 
-      success: false, 
-      error: 'HUGGINGFACE_API_KEY not configured. Add it in Vercel/Netlify environment variables.' 
-    });
-  }
+// Support either name: HF_TOKEN or HUGGINGFACE_API_KEY
+ const HF = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
+ console.log('HF token present?', !!HF);
+ if (!HF) return res.status(500).json({ success: false, error: 'Missing HF token. Add HF_TOKEN in Vercel Environment Variables.' });
 
-  const { prompt } = req.body;
-  if (!prompt) {
-    return res.status(400).json({ success: false, error: 'Prompt required' });
-  }
+// Make sure body has JSON and a prompt
+ let prompt = '';
+ try {
+ prompt = (req.body && req.body.prompt) ? req.body.prompt : '';
+ } catch (e) {
+ prompt = '';
+ }
+ if (!prompt || prompt.trim() === '') return res.status(400).json({ success: false, error: 'Prompt required' });
 
-  try {
-    console.log('Generating with prompt:', prompt);
-    
-    // Using Stable Diffusion XL - free on HuggingFace
-    const response = await fetch(
-      'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0',
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${hfToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          inputs: prompt,
-          parameters: {
-            negative_prompt: "blurry, bad quality, distorted, ugly, deformed",
-            num_inference_steps: 30,
-            guidance_scale: 7.5
-          }
-        })
-      }
-    );
+try {
+ // Tongyi-MAI model endpoint
+ const url = 'https://api-inference.huggingface.co/models/Tongyi-MAI/Z-Image-Turbo';
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('HuggingFace API Error:', response.status, errorText);
-      
-      // Model might be loading (common on first use)
-      if (response.status === 503) {
-        return res.json({ 
-          success: false,
-          error: 'Model is loading, please try again in 20 seconds',
-          details: errorText
-        });
-      }
-      
-      return res.json({ 
-        success: false,
-        error: `API Error ${response.status}`,
-        details: errorText
-      });
-    }
+const resp = await fetch(url, {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${HF}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    inputs: prompt,
+    // you can add parameters here if desired; keep minimal to start
+  })
+});
 
-    // Response is the image blob
-    const imageBuffer = await response.arrayBuffer();
-    const base64Image = Buffer.from(imageBuffer).toString('base64');
-    
-    console.log('Image generated successfully');
-    
-    return res.json({ 
-      success: true, 
-      imageUrl: `data:image/png;base64,${base64Image}`
-    });
-    
-  } catch (error) {
-    console.error('Generation Error:', error);
-    return res.json({ 
-      success: false, 
-      error: 'Request failed', 
-      details: error.message 
-    });
-  }
+// Read raw text first to capture error messages (HF often returns JSON text)
+const text = await resp.text();
+
+if (!resp.ok) {
+  // Forward HF status and message so the front-end can show it
+  console.error('HF Error', resp.status, text);
+  // Try to parse JSON error message for clarity
+  let msg = text;
+  try { msg = JSON.parse(text); } catch(e) { /* keep raw text */ }
+  return res.status(resp.status).json({ success: false, error: msg });
+}
+
+// Success: response is binary image data. Convert to base64.
+const buffer = Buffer.from(text, 'binary'); // text is raw binary from resp.text(), but typically arrayBuffer would be better
+// If the above doesn't work for a given model, you can switch to resp.arrayBuffer()
+const base64 = buffer.toString('base64');
+
+return res.json({ success: true, imageUrl: `data:image/png;base64,${base64}` });
+
+} catch (err) {
+ console.error('Server error', err);
+ return res.status(500).json({ success: false, error: 'Server error: ' + (err.message || err.toString()) });
+ }
 }
