@@ -334,14 +334,17 @@
     feather.replace();
     
     const appState = {
-        collectionName: '',
-        artworkCount: 1,
-        prompt: '',
-        metadataFile: null,
-        selectedTraits: {},
-        csvData: null,
-        isGenerating: false
-    };
+  collectionName: 'FUAX_Collection',    // Collection name
+  artworkCount: 3,                       // Number to generate
+  prompt: 'cyberpunk character...',      // Base prompt
+  metadataFile: null,                    // Uploaded CSV/JSON
+  selectedTraits: {},                    // {background: 'neon', character: 'robot'}
+  csvData: null,                         // Parsed CSV array
+  isGenerating: false,                   // Lock during generation
+  generatedImages: []                    // Array of base64 image URLs
+};
+  }
+
 
     document.addEventListener('DOMContentLoaded', () => {
         // File upload handling
@@ -370,6 +373,89 @@
 
         // Generate button
         document.getElementById('generate-btn').addEventListener('click', generateCollection);
+        // Download all button
+        document.getElementById('downloadAllBtn').addEventListener('click', () => {
+            state.images.forEach((img, i) => {
+                setTimeout(() => downloadImage(`${state.collectionName}_${i+1}.png`, img), i * 500);
+            });
+        });
+
+        async function generateCollection() {
+            if (state.isGenerating) return;
+            
+            state.collectionName = document.getElementById('collectionName').value || 'FUAX_Collection';
+            state.artworkCount = parseInt(document.getElementById('artworkCount').value) || 3;
+            state.prompt = document.getElementById('prompt').value;
+            
+            if (!state.prompt && Object.keys(state.traits).length === 0) {
+                showToast('Please enter a prompt or select traits', 'error');
+                return;
+            }
+            
+            state.isGenerating = true;
+            state.images = [];
+            document.getElementById('generateBtn').disabled = true;
+            document.getElementById('status').style.display = 'block';
+            document.getElementById('downloadAllBtn').style.display = 'none';
+            document.getElementById('previewGrid').innerHTML = '';
+            
+            const basePrompt = buildPrompt();
+            const variations = [
+                'front view, centered',
+                'side profile, dramatic',
+                'three quarter view',
+                'close up, detailed',
+                'full body, dynamic',
+                'low angle, powerful',
+                'high angle, cinematic',
+                'extreme close up',
+                'wide shot, epic',
+                'dutch angle, artistic'
+            ];
+            
+            const colorMods = ['vibrant', 'muted', 'high contrast', 'soft', 'saturated'];
+            const styleMods = ['sharp details', 'soft focus', 'high definition', 'cinematic', 'ultra detailed'];
+            
+            for (let i = 0; i < state.artworkCount; i++) {
+                let finalPrompt = basePrompt;
+                
+                // Add CSV data if available
+                if (state.csvData && state.csvData[i]) {
+                    const csvRow = Object.values(state.csvData[i]).filter(v => v).join(' ');
+                    finalPrompt = `${csvRow} ${finalPrompt}`;
+                }
+                
+                // Add variation to ensure uniqueness
+                const variation = variations[i % variations.length];
+                const colorMod = colorMods[Math.floor(Math.random() * colorMods.length)];
+                const styleMod = styleMods[Math.floor(Math.random() * styleMods.length)];
+                const seed = Math.floor(Math.random() * 1000000);
+                
+                finalPrompt = `${finalPrompt}, ${variation}, ${colorMod} colors, ${styleMod}, seed:${seed}`;
+                
+                // Add loading placeholder
+                const placeholder = document.createElement('div');
+                placeholder.className = 'preview-item';
+                placeholder.id = `img-${i}`;
+                placeholder.innerHTML = '<div class="spinner" style="margin-top: 50%;"></div>';
+                document.getElementById('previewGrid').appendChild(placeholder);
+                
+                try {
+                    const imageUrl = await generateImage(finalPrompt);
+                    state.images.push(imageUrl);
+                    
+                    placeholder.innerHTML = `
+                        <img src="${imageUrl}" alt="NFT ${i+1}">
+                        <div class="download-btn" onclick="downloadImage('${state.collectionName}_${i+1}.png', '${imageUrl}')">
+                            💾 Save
+                        </div>
+                    `;
+                } catch (err) {
+                    placeholder.innerHTML = `<div style="text-align: center; color: #ef4444; padding: 20px; font-size: 12px;">Failed<br>${err.message}</div>`;
+                }
+                
+                document.getElementById('progress').textContent = `${Math.round(((i+1)/state.artworkCount)*100)}%`;
+                
 
         // Trait selection handling
         document.addEventListener('click', (event) => {
