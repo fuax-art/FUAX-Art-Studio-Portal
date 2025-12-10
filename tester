@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FUAX Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #00ffff;
+            font-family: system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #cd5c28;
+            border-radius: 12px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+        }
+        .btn {
+            background: #cd5c28;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn:hover { background: #e66d30; transform: translateY(-2px); }
+        .btn:disabled { background: #5a2812; cursor: not-allowed; opacity: 0.6; }
+        input, textarea, select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #cd5c28;
+            color: #00ffff;
+            padding: 10px;
+            border-radius: 6px;
+            outline: none;
+        }
+        input::placeholder, textarea::placeholder { color: #00cccc; }
+        .trait-btn {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+        }
+        .trait-btn:hover { background: rgba(205, 92, 40, 0.3); transform: scale(1.05); }
+        .trait-btn.active {
+            background: #cd5c28;
+            border-color: #cd5c28;
+            color: white;
+            transform: scale(1.05);
+        }
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .preview-item {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #cd5c28;
+        }
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .preview-item img:hover { transform: scale(1.05); }
+        .preview-item .download-btn {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: #cd5c28;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .preview-item:hover .download-btn { opacity: 1; }
+        .spinner {
+            border: 3px solid rgba(0, 255, 255, 0.3);
+            border-top: 3px solid #00ffff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            color: white;
+            z-index: 1000;
+            animation: slideIn 0.3s;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(400px); }
+            to { transform: translateX(0); }
+        }
+        .toast.success { background: #10b981; }
+        .toast.error { background: #ef4444; }
+        label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 500; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 40px;">
+            <h1 style="font-size: 48px; font-weight: 800; margin-bottom: 8px;">
+                <span style="color: #cd5c28;">FUAX</span> <span style="color: #00ffff;">Generator</span>
+            </h1>
+            <p style="color: #00cccc; font-size: 16px;">Forever Unfinished Artworx • Powered by Pollinations 🌸</p>
+        </div>
+
+        <div class="grid-2">
+            <!-- Left Panel: Controls + Traits -->
+            <div>
+                <div class="card" style="margin-bottom: 20px;">
+                    <h2 style="font-size: 20px; margin-bottom: 20px; color: #cd5c28;">⚡ Controls</h2>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label>Collection Name</label>
+                        <input type="text" id="collectionName" value="FUAX_Collection" placeholder="My Collection">
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label>Number of Artworks (1-10)</label>
+                        <input type="number" id="artworkCount" min="1" max="10" value="3">
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label>Prompt</label>
+                        <textarea id="prompt" rows="4" placeholder="cyberpunk warrior with neon accents, dramatic lighting, high detail..."></textarea>
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label>CSV/JSON Upload (Optional)</label>
+                        <input type="file" id="csvFile" accept=".csv,.json" style="padding: 8px;">
+                        <p id="fileName" style="font-size: 12px; color: #10b981; margin-top: 4px;"></p>
+                    </div>
+
+                    <button class="btn" id="generateBtn" style="width: 100%; font-size: 16px;">
+                        🚀 Generate Collection
+                    </button>
+
+                    <div id="status" style="text-align: center; margin-top: 16px; display: none;">
+                        <div class="spinner"></div>
+                        <p style="margin-top: 12px; font-size: 14px;">Generating... <span id="progress">0%</span></p>
+                    </div>
+                </div>
+
+                <!-- Traits -->
+                <div class="card">
+                    <h2 style="font-size: 20px; margin-bottom: 20px; color: #cd5c28;">🎨 Quick Traits</h2>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label>Background</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <button class="trait-btn" data-type="background" data-value="neon blue cyberpunk">Blue</button>
+                            <button class="trait-btn" data-type="background" data-value="crimson red galaxy">Red</button>
+                            <button class="trait-btn" data-type="background" data-value="matrix green">Green</button>
+                            <button class="trait-btn" data-type="background" data-value="golden sunset">Gold</button>
+                            <button class="trait-btn" data-type="background" data-value="purple nebula">Purple</button>
+                            <button class="trait-btn" data-type="background" data-value="cyan holographic">Cyan</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label>Character</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <button class="trait-btn" data-type="character" data-value="cyberpunk human">Human</button>
+                            <button class="trait-btn" data-type="character" data-value="robot with LED lights">Robot</button>
+                            <button class="trait-btn" data-type="character" data-value="bio-luminescent alien">Alien</button>
+                            <button class="trait-btn" data-type="character" data-value="anthropomorphic animal">Animal</button>
+                            <button class="trait-btn" data-type="character" data-value="monster">Monster</button>
+                            <button class="trait-btn" data-type="character" data-value="ghost">Ghost</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label>Style</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <button class="trait-btn" data-type="style" data-value="digital art">Digital</button>
+                            <button class="trait-btn" data-type="style" data-value="anime style">Anime</button>
+                            <button class="trait-btn" data-type="style" data-value="photorealistic">Photo</button>
+                            <button class="trait-btn" data-type="style" data-value="pixel art">Pixel</button>
+                            <button class="trait-btn" data-type="style" data-value="oil painting">Oil</button>
+                            <button class="trait-btn" data-type="style" data-value="3D render">3D</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label>Accessories</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <button class="trait-btn" data-type="accessory" data-value="neon beanie">Beanie</button>
+                            <button class="trait-btn" data-type="accessory" data-value="cyber sunglasses">Glasses</button>
+                            <button class="trait-btn" data-type="accessory" data-value="brass knuckles">Knuckles</button>
+                            <button class="trait-btn" data-type="accessory" data-value="tech hoodie">Hoodie</button>
+                            <button class="trait-btn" data-type="accessory" data-value="neon baseball bat">Bat</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Preview -->
+            <div>
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="font-size: 20px; color: #cd5c28;">👁️ Collection</h2>
+                        <button id="downloadAllBtn" class="btn" style="display: none; padding: 8px 16px; font-size: 14px;">
+                            💾 Download All
+                        </button>
+                    </div>
+                    
+                    <div class="preview-grid" id="previewGrid">
+                        <div class="preview-item" style="display: flex; align-items: center; justify-content: center; color: #00cccc;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 48px; margin-bottom: 8px;">🎨</div>
+                                <p style="font-size: 14px;">Your artworks<br>appear here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            collectionName: 'FUAX_Collection',
+            artworkCount: 3,
+            prompt: '',
+            traits: {},
+            csvData: null,
+            images: [],
+            isGenerating: false
+        };
+
+        // Trait selection
+        document.querySelectorAll('.trait-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.dataset.type;
+                const value = btn.dataset.value;
+                
+                // Toggle selection
+                if (state.traits[type] === value) {
+                    delete state.traits[type];
+                    btn.classList.remove('active');
+                } else {
+                    // Remove other active buttons in same category
+                    document.querySelectorAll(`[data-type="${type}"]`).forEach(b => b.classList.remove('active'));
+                    state.traits[type] = value;
+                    btn.classList.add('active');
+                }
+            });
+        });
+
+        // File upload
+        document.getElementById('csvFile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const text = await file.text();
+            
+            try {
+                if (file.name.endsWith('.json')) {
+                    state.csvData = JSON.parse(text);
+                } else if (file.name.endsWith('.csv')) {
+                    const lines = text.split('\n').filter(l => l.trim());
+                    const headers = lines[0].split(',').map(h => h.trim());
+                    state.csvData = lines.slice(1).map(line => {
+                        const values = line.split(',').map(v => v.trim());
+                        const obj = {};
+                        headers.forEach((h, i) => obj[h] = values[i] || '');
+                        return obj;
+                    });
+                }
+                document.getElementById('fileName').textContent = `✓ Loaded ${state.csvData.length} entries`;
+                showToast('CSV loaded successfully', 'success');
+            } catch (err) {
+                showToast('Failed to parse file', 'error');
+            }
+        });
+
+        // Generate button
+        document.getElementById('generateBtn').addEventListener('click', generateCollection);
+
+        // Download all button
+        document.getElementById('downloadAllBtn').addEventListener('click', () => {
+            state.images.forEach((img, i) => {
+                setTimeout(() => downloadImage(`${state.collectionName}_${i+1}.png`, img), i * 500);
+            });
+        });
+
+        async function generateCollection() {
+            if (state.isGenerating) return;
+            
+            state.collectionName = document.getElementById('collectionName').value || 'FUAX_Collection';
+            state.artworkCount = parseInt(document.getElementById('artworkCount').value) || 3;
+            state.prompt = document.getElementById('prompt').value;
+            
+            if (!state.prompt && Object.keys(state.traits).length === 0) {
+                showToast('Please enter a prompt or select traits', 'error');
+                return;
+            }
+            
+            state.isGenerating = true;
+            state.images = [];
+            document.getElementById('generateBtn').disabled = true;
+            document.getElementById('status').style.display = 'block';
+            document.getElementById('downloadAllBtn').style.display = 'none';
+            document.getElementById('previewGrid').innerHTML = '';
+            
+            const basePrompt = buildPrompt();
+            const variations = [
+                'front view, centered',
+                'side profile, dramatic',
+                'three quarter view',
+                'close up, detailed',
+                'full body, dynamic',
+                'low angle, powerful',
+                'high angle, cinematic',
+                'extreme close up',
+                'wide shot, epic',
+                'dutch angle, artistic'
+            ];
+            
+            const colorMods = ['vibrant', 'muted', 'high contrast', 'soft', 'saturated'];
+            const styleMods = ['sharp details', 'soft focus', 'high definition', 'cinematic', 'ultra detailed'];
+            
+            for (let i = 0; i < state.artworkCount; i++) {
+                let finalPrompt = basePrompt;
+                
+                // Add CSV data if available
+                if (state.csvData && state.csvData[i]) {
+                    const csvRow = Object.values(state.csvData[i]).filter(v => v).join(' ');
+                    finalPrompt = `${csvRow} ${finalPrompt}`;
+                }
+                
+                // Add variation to ensure uniqueness
+                const variation = variations[i % variations.length];
+                const colorMod = colorMods[Math.floor(Math.random() * colorMods.length)];
+                const styleMod = styleMods[Math.floor(Math.random() * styleMods.length)];
+                const seed = Math.floor(Math.random() * 1000000);
+                
+                finalPrompt = `${finalPrompt}, ${variation}, ${colorMod} colors, ${styleMod}, seed:${seed}`;
+                
+                // Add loading placeholder
+                const placeholder = document.createElement('div');
+                placeholder.className = 'preview-item';
+                placeholder.id = `img-${i}`;
+                placeholder.innerHTML = '<div class="spinner" style="margin-top: 50%;"></div>';
+                document.getElementById('previewGrid').appendChild(placeholder);
+                
+                try {
+                    const imageUrl = await generateImage(finalPrompt);
+                    state.images.push(imageUrl);
+                    
+                    placeholder.innerHTML = `
+                        <img src="${imageUrl}" alt="NFT ${i+1}">
+                        <div class="download-btn" onclick="downloadImage('${state.collectionName}_${i+1}.png', '${imageUrl}')">
+                            💾 Save
+                        </div>
+                    `;
+                } catch (err) {
+                    placeholder.innerHTML = `<div style="text-align: center; color: #ef4444; padding: 20px; font-size: 12px;">Failed<br>${err.message}</div>`;
+                }
+                
+                document.getElementById('progress').textContent = `${Math.round(((i+1)/state.artworkCount)*100)}%`;
+                
+                // Delay between requests
+                if (i < state.artworkCount - 1) {
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+            }
+            
+            document.getElementById('status').style.display = 'none';
+            document.getElementById('generateBtn').disabled = false;
+            document.getElementById('downloadAllBtn').style.display = state.images.length > 0 ? 'block' : 'none';
+            state.isGenerating = false;
+            showToast('Generation complete!', 'success');
+        }
+
+        function buildPrompt() {
+            const traitValues = Object.values(state.traits);
+            const traitPrompt = traitValues.length > 0 ? traitValues.join(', ') + ', ' : '';
+            return traitPrompt + state.prompt;
+        }
+
+        async function generateImage(prompt) {
+            const encodedPrompt = encodeURIComponent(prompt);
+            const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&enhance=true&model=flux`;
+            
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Generation failed');
+            
+            const blob = await response.blob();
+            return URL.createObjectURL(blob);
+        }
+
+        function downloadImage(filename, url) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            showToast(`Downloaded ${filename}`, 'success');
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Input handlers
+        document.getElementById('collectionName').value = state.collectionName;
+        document.getElementById('artworkCount').addEventListener('input', (e) => {
+            e.target.value = Math.max(1, Math.min(10, parseInt(e.target.value) || 1));
+        });
+    </script>
+</body>
+</html>
