@@ -31,18 +31,7 @@ const styleVariations = [
 ];
 
 // Each prompt gets: basePrompt + variation + colorVar + styleVar + randomSeed
-    const appState = {
-  collectionName: 'FUAX_Collection',    // Collection name
-  artworkCount: 3,                       // Number to generate
-  prompt: 'cyberpunk character...',      // Base prompt
-  metadataFile: null,                    // Uploaded CSV/JSON
-  selectedTraits: {},                    // {background: 'neon', character: 'robot'}
-  csvData: null,                         // Parsed CSV array
-  isGenerating: false,                   // Lock during generation
-  generatedImages: []                    // Array of base64 image URLs
-};
-  }
-
+   
   const { prompt, width = 1024, height = 1024 } = req.body;
   if (!prompt) {
     return res.status(400).json({ success: false, error: 'Prompt required' });
