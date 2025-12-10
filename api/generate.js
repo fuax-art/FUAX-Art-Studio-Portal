@@ -31,6 +31,42 @@ export default async function handler(req, res) {
 
     const imageBuffer = await response.arrayBuffer();
     const base64Image = Buffer.from(imageBuffer).toString('base64');
+
+    // For each image in batch, adds unique variations:
+const variations = [
+  'front view, centered composition',
+  'side profile, dramatic lighting',
+  'three quarter view, dynamic pose',
+  'close up portrait, detailed features',
+  'full body shot, action pose',
+  // ... etc
+];
+
+const colorVariations = [
+  'vibrant colors',
+  'muted tones',
+  'high contrast',
+  // ... etc
+];
+
+const styleVariations = [
+  'sharp details',
+  'soft focus',
+  'high definition',
+  // ... etc
+];
+
+// Each prompt gets: basePrompt + variation + colorVar + styleVar + randomSeed
+    const appState = {
+  collectionName: 'FUAX_Collection',    // Collection name
+  artworkCount: 3,                       // Number to generate
+  prompt: 'cyberpunk character...',      // Base prompt
+  metadataFile: null,                    // Uploaded CSV/JSON
+  selectedTraits: {},                    // {background: 'neon', character: 'robot'}
+  csvData: null,                         // Parsed CSV array
+  isGenerating: false,                   // Lock during generation
+  generatedImages: []                    // Array of base64 image URLs
+};
     
     console.log('✅ Image generated successfully');
     
