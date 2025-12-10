@@ -1,63 +1,67 @@
+// api/generate.js - Pollinations.ai (NO API KEY NEEDED!)
 export default async function handler(req, res) {
- // CORS (keeps browser happy)
- res.setHeader('Access-Control-Allow-Origin', '');
- res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
- res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-if (req.method === 'OPTIONS') return res.status(200).end();
- if (req.method !== 'POST') return res.status(405).json({ success: false, error: 'Method not allowed' });
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, error: 'Method not allowed' });
+  }
 
-// Support either name: HF_TOKEN or HUGGINGFACE_API_KEY
- const HF = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
- console.log('HF token present?', !!HF);
- if (!HF) return res.status(500).json({ success: false, error: 'Missing HF token. Add HF_TOKEN in Vercel Environment Variables.' });
+  const { prompt, width = 1024, height = 1024 } = req.body;
+  if (!prompt) {
+    return res.status(400).json({ success: false, error: 'Prompt required' });
+  }
 
-// Make sure body has JSON and a prompt
- let prompt = '';
- try {
- prompt = (req.body && req.body.prompt) ? req.body.prompt : '';
- } catch (e) {
- prompt = '';
- }
- if (!prompt || prompt.trim() === '') return res.status(400).json({ success: false, error: 'Prompt required' });
+  try {
+    console.log('🌸 Pollinations generating:', prompt);
+    
+    // Encode prompt for URL
+    const encodedPrompt = encodeURIComponent(prompt);
+    
+    // Pollinations.ai direct image URL - completely free, no API key!
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&enhance=true&model=flux`;
+    
+    console.log('Fetching from:', imageUrl);
+    
+    // Fetch the image
+    const response = await fetch(imageUrl);
+    
+    if (!response.ok) {
+      return res.json({ 
+        success: false,
+        error: `Failed to generate: ${response.status}`
+      });
+    }
 
-try {
- // Tongyi-MAI model endpoint
- const url = 'https://api-inference.huggingface.co/models/Tongyi-MAI/Z-Image-Turbo';
-
-const resp = await fetch(url, {
-  method: 'POST',
-  headers: {
-    Authorization: `Bearer ${HF}`,
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    inputs: prompt,
-    // you can add parameters here if desired; keep minimal to start
-  })
-});
-
-// Read raw text first to capture error messages (HF often returns JSON text)
-const text = await resp.text();
-
-if (!resp.ok) {
-  // Forward HF status and message so the front-end can show it
-  console.error('HF Error', resp.status, text);
-  // Try to parse JSON error message for clarity
-  let msg = text;
-  try { msg = JSON.parse(text); } catch(e) { /* keep raw text */ }
-  return res.status(resp.status).json({ success: false, error: msg });
+    // Convert to base64
+    const imageBuffer = await response.arrayBuffer();
+    const base64Image = Buffer.from(imageBuffer).toString('base64');
+    
+    console.log('✅ Image generated successfully');
+    
+    return res.json({ 
+      success: true, 
+      imageUrl: `data:image/jpeg;base64,${base64Image}`
+    });
+    
+  } catch (error) {
+    console.error('Generation Error:', error);
+    return res.json({ 
+      success: false, 
+      error: 'Request failed', 
+      details: error.message 
+    });
+  }
 }
 
-// Success: response is binary image data. Convert to base64.
-const buffer = Buffer.from(text, 'binary'); // text is raw binary from resp.text(), but typically arrayBuffer would be better
-// If the above doesn't work for a given model, you can switch to resp.arrayBuffer()
-const base64 = buffer.toString('base64');
-
-return res.json({ success: true, imageUrl: `data:image/png;base64,${base64}` });
-
-} catch (err) {
- console.error('Server error', err);
- return res.status(500).json({ success: false, error: 'Server error: ' + (err.message || err.toString()) });
- }
-}
+// WHY POLLINATIONS IS PERFECT:
+// ✅ NO API KEY - Zero setup
+// ✅ FREE - No billing, no limits
+// ✅ FAST - 2-3 second generation
+// ✅ GOOD QUALITY - Uses FLUX model
+// ✅ NO ACCOUNT - Just works
+//
+// Just replace your api/generate.js with this code and deploy.
+// That's it. No environment variables, no API keys, nothing.
