@@ -17,15 +17,9 @@ export default async function handler(req, res) {
   try {
     console.log('🌸 Pollinations generating:', prompt);
     
-    // Encode prompt for URL
     const encodedPrompt = encodeURIComponent(prompt);
-    
-    // Pollinations.ai direct image URL - completely free, no API key!
     const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&enhance=true&model=flux`;
     
-    console.log('Fetching from:', imageUrl);
-    
-    // Fetch the image
     const response = await fetch(imageUrl);
     
     if (!response.ok) {
@@ -35,7 +29,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // Convert to base64
     const imageBuffer = await response.arrayBuffer();
     const base64Image = Buffer.from(imageBuffer).toString('base64');
     
@@ -55,13 +48,3 @@ export default async function handler(req, res) {
     });
   }
 }
-
-// WHY POLLINATIONS IS PERFECT:
-// ✅ NO API KEY - Zero setup
-// ✅ FREE - No billing, no limits
-// ✅ FAST - 2-3 second generation
-// ✅ GOOD QUALITY - Uses FLUX model
-// ✅ NO ACCOUNT - Just works
-//
-// Just replace your api/generate.js with this code and deploy.
-// That's it. No environment variables, no API keys, nothing.
