@@ -63,15 +63,8 @@ async function generateCollection() {
                 </div>
             `;
 
-            const response = await fetch('/api/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    prompt: prompts[i],
-                    width: 1024,
-                    height: 1024
-                })
-            });
+            const query = `?prompt=${encodeURIComponent(prompts[i])}&width=1024&height=1024`;
+            const response = await fetch(`/api/generate${query}`);
 
             const data = await response.json();
             console.log(`Prompt ${i+1}:`, prompts[i]);
